@@ -2,6 +2,15 @@ name: AppImage x86_64 V1.1
 on:
   push:
     branches: [main]
+    paths:
+      - 'fuentes/**'
+      - 'motor/**'
+      - 'assets/**'
+      - 'banda_sonora_original/**'
+      - 'packaging/**'
+      - 'COMPILAR_LINUX.sh'
+      - 'lib/**'
+      - '.github/workflows/appimage.yml'
   workflow_dispatch:
 permissions:
   contents: write
