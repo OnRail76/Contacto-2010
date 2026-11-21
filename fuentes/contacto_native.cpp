@@ -72,7 +72,8 @@ public:
  // Recortes reales de tinta de cada glifo RGBA, calculados una sola vez al cargar.
  std::map<std::string,std::vector<SDL_Rect>> hudGlyphInk;
  // Una unica salida SDL2 con mezcla polifonica en el callback de audio.
- SDL_AudioDeviceID auddev=0; bool sound=true;
+ SDL_AudioDeviceID auddev=0; bool sound=true,stereoSpatial=true;
+  int scanlines=1;SDL_Texture* scanlineTexture=nullptr;
  int masterVolume=100,musicVolume=100,effectsVolume=100;
  bool musicPaused=false;
  // Valores guardados y mezcla de pistas independientes (audio PCM precargado).
@@ -101,7 +102,7 @@ public:
  void close_gamepad(){gn::close_controller(pad,padInstance);}
  bool open_gamepad(int deviceIndex){return gn::open_controller(deviceIndex,pad,padInstance);}
  void scan_gamepads(){gn::scan_controllers(pad,padInstance,lastPadScan);}
- void cleanup(){for(auto &p:textures)if(p.second.t)SDL_DestroyTexture(p.second.t);textures.clear(); close_gamepad();if(auddev)SDL_CloseAudioDevice(auddev);if(ren)SDL_DestroyRenderer(ren);if(win)SDL_DestroyWindow(win); SDL_Quit();}
+ void cleanup(){for(auto &p:textures)if(p.second.t)SDL_DestroyTexture(p.second.t);textures.clear(); close_gamepad();if(auddev)SDL_CloseAudioDevice(auddev);if(scanlineTexture)SDL_DestroyTexture(scanlineTexture);if(ren)SDL_DestroyRenderer(ren);if(win)SDL_DestroyWindow(win); SDL_Quit();}
  bool load(const std::string& name,const std::string& file){
    gn::LoadedPng decoded=gn::load_png_texture(ren,base+file);
    if(!decoded.texture){std::cerr<<"PNG "<<file<<": "<<decoded.error<<"\n";return false;}
@@ -132,6 +133,13 @@ public:
   if(!ren)ren=SDL_CreateRenderer(win,-1,1);
   if(!ren){std::cerr<<"SDL_Renderer: "<<SDL_GetError()<<"\n";return false;}
   SDL_RenderSetLogicalSize(ren,W,H);SDL_SetRenderDrawBlendMode(ren,1);SDL_ShowCursor(0);
+   scanlineTexture=SDL_CreateTexture(ren,SDL_PIXELFORMAT_ABGR8888,0,1,H);
+   if(scanlineTexture){
+     std::vector<uint8_t> pixels(size_t(H)*4,0);
+     for(int y=0;y<H;++y)if(y%2)pixels[size_t(y)*4+3]=255;
+     SDL_UpdateTexture(scanlineTexture,nullptr,pixels.data(),4);
+     SDL_SetTextureBlendMode(scanlineTexture,1);
+   }
   struct Item{const char* k;const char* f;};
   const Item list[]={{"fondo","jupiter.png"},{"mapa","fase1_cementerio_v2_1920x540.png"},{"ship","firebird_01_16f_hd.png"},{"moai","moai_24f.png"},{"sierra","rodante_sierra_24f.png"},{"menor","enemigo_monolito_24f.png"},{"portrait","retratos_definitivos.png"},{"fx_orb","fx_bala_enemiga.png"},{"fx_pulse","fx_pulso.png"},{"fx_laser","fx_laser.png"},{"escudo_nuevo","escudo_firebird_nuevo_4f.png"},{"triangulo","alerta_estalactitas_4f.png"},{"mira","mira_debil_jefes_4f.png"},{"logo","CONTACTO_2010_LOGO_JUEGO.png"},{"marca_tony","tony_c_ware_logo.png"},{"marca_grit","grit_nova_logo_oficial.png"},{"hud","hud_militar_960x120.png"},{"glyph","fuente_legible.png"},
    {"hud_white","hud_fuentes/FUENTE_BLANCO_HIELO.png"},{"hud_cyan","hud_fuentes/FUENTE_CIAN_RADAR.png"},{"hud_amber","hud_fuentes/FUENTE_AMBAR_ARMA.png"},{"hud_magenta","hud_fuentes/FUENTE_MAGENTA_ALERTA.png"},{"hud_big","hud_fuentes/FUENTE_NUMEROS_GRANDES.png"},{"hud_smile","hud_fuentes/VIDAS_SMILEYS_RGBA.png"},
@@ -204,7 +212,7 @@ public:
    for(size_t i=0;i<samples.size();++i)
       samples[i]=int16_t(uint16_t(b[pcmOffset+i*2])|(uint16_t(b[pcmOffset+i*2+1])<<8));
   }
-  SDL_AudioSpec spec{};spec.freq=22050;spec.format=AUDIO_S16LSB;spec.channels=1;spec.samples=1024;
+  SDL_AudioSpec spec{};spec.freq=22050;spec.format=AUDIO_S16LSB;spec.channels=2;spec.samples=1024;
   spec.callback=&Game::audio_callback;spec.userdata=this;
   SDL_AudioSpec obtained{};
   auddev=SDL_OpenAudioDevice(nullptr,0,&spec,&obtained,0);
@@ -212,10 +220,10 @@ public:
   else {
     const char* driver=SDL_GetCurrentAudioDriver();
     std::cerr<<"Audio SDL2: driver="<<(driver?driver:"desconocido")
-             <<" formato="<<obtained.freq<<" Hz/mono/16-bit"
+             <<" formato="<<obtained.freq<<" Hz/estereo/16-bit"
              <<" bufer="<<obtained.samples<<" muestras\n";
   }
-  if(auddev&&(obtained.freq!=22050||obtained.format!=AUDIO_S16LSB||obtained.channels!=1)){
+  if(auddev&&(obtained.freq!=22050||obtained.format!=AUDIO_S16LSB||obtained.channels!=2)){
     std::cerr<<"Formato de dispositivo audio incompatible\n";SDL_CloseAudioDevice(auddev);auddev=0;
   }
   load_audio_settings();load_best();music("musica_titulo");if(auddev)SDL_PauseAudioDevice(auddev,0);return true;
@@ -235,12 +243,15 @@ public:
    else if(name=="music")musicVolume=val;
    else if(name=="effects")effectsVolume=val;
    else if(name=="enabled")sound=(val!=0);
+    else if(name=="stereo")stereoSpatial=(val!=0);
+    else if(name=="scanlines")scanlines=std::clamp(val,0,3);
   }
  }
  void save_audio_settings()const{
   std::ofstream f("audio_config.ini",std::ios::trunc);
   if(f)f<<"master "<<masterVolume<<"\nmusic "<<musicVolume
-       <<"\neffects "<<effectsVolume<<"\nenabled "<<(sound?1:0)<<"\n";
+       <<"\neffects "<<effectsVolume<<"\nenabled "<<(sound?1:0)
+        <<"\nstereo "<<(stereoSpatial?1:0)<<"\nscanlines "<<scanlines<<"\n";
  }
  static constexpr int JUKE_COUNT=10;
  static constexpr const char* jukeName[JUKE_COUNT]={
@@ -278,10 +289,10 @@ public:
    static_cast<Game*>(userdata)->mix_audio(stream,bytes);
  }
  void mix_audio(uint8_t* stream,int bytes){
-   gn::mix_mono_s16(stream,bytes,sound,musicTrack,musicPos,musicPaused,musicLoop,
-                     voices,masterVolume,musicVolume,effectsVolume);
+   gn::mix_stereo_s16(stream,bytes,sound,stereoSpatial,musicTrack,musicPos,musicPaused,musicLoop,
+                        voices,masterVolume,musicVolume,effectsVolume);
  }
- void tone(const std::string& name,bool playerShot=false){
+ void tone(const std::string& name,bool playerShot=false,float x=-1.f){
    if(!sound||!auddev)return;
    auto it=audio.find(name);if(it==audio.end()||it->second.pcm.empty())return;
    // Clases: disparos no deben robar una explosion, y el rayo tiene prioridad alta.
@@ -297,13 +308,14 @@ public:
    else if(name=="item"){priority=7;maxSame=2;gain=.57f;}
    else if(name=="misil"){priority=4;maxSame=3;cooldown=50;gain=.54f;}
    uint32_t now=SDL_GetTicks();
-   if(playerShot){
+   const float pan=x<0.f?0.f:std::clamp((x-float(W)*.5f)/(float(W)*.5f),-1.f,1.f);
+    if(playerShot){
      // FIREBIRD 01: sonido para CADA disparo, sin azar, cooldown ni robo de voz.
      // PULSO/DOBLE duran ~65 ms; LÁSER ~130 ms: menos que el intervalo de tiro.
      // Por eso una voz dedicada basta y no se acumulan disparos viejos en la cola.
      ++playerShotAudioRequested;
      SDL_LockAudioDevice(auddev);
-     voices[0]={&it->second,0,name=="laser"?1.00f:1.12f,20,now};
+     voices[0]={&it->second,0,name=="laser"?1.00f:1.12f,20,now,pan};
      ++playerShotAudioScheduled;
      SDL_UnlockAudioDevice(auddev);
      return;
@@ -322,7 +334,7 @@ public:
    if(playingSame>=maxSame){SDL_UnlockAudioDevice(auddev);return;}
    int slot=freeSlot;
    if(slot<0&&lowestSlot>=0&&voices[lowestSlot].priority<priority)slot=lowestSlot;
-   if(slot>=0)voices[slot]={&it->second,0,gain,priority,now};
+   if(slot>=0)voices[slot]={&it->second,0,gain,priority,now,pan};
    SDL_UnlockAudioDevice(auddev);
    if(slot>=0)lastSfxAt[name]=now;
  }
@@ -694,7 +706,7 @@ public:
    fire(shipx+SHIP_NOSE_X,shipy-1,620,0,true);
    if(weapon==1){fire(shipx+SHIP_NOSE_X-4,shipy-11,610,-24,true);fire(shipx+SHIP_NOSE_X-4,shipy+11,610,24,true);}
    if(weapon==2){fire(shipx+SHIP_NOSE_X+1,shipy-6,780,0,true);fire(shipx+SHIP_NOSE_X+1,shipy+6,780,0,true);}
-   tone(weapon==2?"laser":"disparo",true);
+   tone(weapon==2?"laser":"disparo",true,shipx);
  }
  // Fase 5 previa: cuatro escuadras reutilizadas, sin sprites inventados.
  // 12/13=F22, 14/15=espectros, 20/21=halcones, 22=Moáis menores.
@@ -906,10 +918,10 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   if(it==audio.end()||it->second.pcm.empty())return 4.2f;
   return std::max(4.2f,float(it->second.pcm.size())/22050.f+0.12f);
  }
- void life_hit(){if(cheatInvulnerable||vulnerable>0||death>0)return;if(shieldTime>0){shieldTime=0;vulnerable=1; tone("impacto");return;}
-  death=.9f;vulnerable=3.1f;lives--;puff(shipx,shipy,70);tone("explosion_grande");shots.erase(std::remove_if(shots.begin(),shots.end(),[](Bullet&b){return b.friendly;}),shots.end());weapon=0;
+ void life_hit(){if(cheatInvulnerable||vulnerable>0||death>0)return;if(shieldTime>0){shieldTime=0;vulnerable=1; tone("impacto",false,shipx);return;}
+  death=.9f;vulnerable=3.1f;lives--;puff(shipx,shipy,70);tone("explosion_grande",false,shipx);shots.erase(std::remove_if(shots.begin(),shots.end(),[](Bullet&b){return b.friendly;}),shots.end());weapon=0;
  }
- void kill(int j){Actor &e=enemies[j];e.alive=false;deaths.push_back({e.kind,e.x,e.y,0});score+=(fase==5?(e.kind==22?650:e.kind==14||e.kind==15?300:420):fase==4?(e.kind<32?240:e.kind<34?380:350):fase==3?(e.kind==22?650:e.kind==23?80:350):fase==2?(e.kind==10||e.kind==11?420:e.kind==12||e.kind==13?350:220):e.kind==3?250:e.kind==1?170:140);save_best();puff(e.x,e.y,35);tone("explosion");if(ri(0,16)==0)prizes.push_back({e.x,e.y,ri(0,2)});}
+ void kill(int j){Actor &e=enemies[j];e.alive=false;deaths.push_back({e.kind,e.x,e.y,0});score+=(fase==5?(e.kind==22?650:e.kind==14||e.kind==15?300:420):fase==4?(e.kind<32?240:e.kind<34?380:350):fase==3?(e.kind==22?650:e.kind==23?80:350):fase==2?(e.kind==10||e.kind==11?420:e.kind==12||e.kind==13?350:220):e.kind==3?250:e.kind==1?170:140);save_best();puff(e.x,e.y,35);tone("explosion",false,e.x);if(ri(0,16)==0)prizes.push_back({e.x,e.y,ri(0,2)});}
  // Epílogo de campaña: tras el jingle de victoria empieza «Remember Love» de FutureDark.
  // La pista 10 es independiente, se reproduce una sola vez y los créditos nunca la cortan automáticamente.
  void begin_final_credits(){
@@ -1038,7 +1050,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
          ++estalactitasPasanCerca;e.ceiling=true;
        }
        if(e.y+29>floorY(e.x)){
-         e.alive=false;deaths.push_back({e.kind,e.x,e.y,0});puff(e.x,e.y,15,CYAN);tone("explosion_corta");
+         e.alive=false;deaths.push_back({e.kind,e.x,e.y,0});puff(e.x,e.y,15,CYAN);tone("explosion_corta",false,e.x);
        }
     }
     if(e.kind!=23&&e.fire<=0&&e.x>40&&e.x<W+30){
@@ -1046,7 +1058,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
        float speed=e.kind==22?248.f:260.f;
        fire(e.x+(e.vx>0?-33:33),e.y,dx/n*speed,dy/n*speed,false);
        // Moái blindado con descarga más frecuente; halcones atacan a ritmo variable.
-       e.fire=e.kind==22?1.55f:rf(1.10f,1.55f);tone("laser");
+       e.fire=e.kind==22?1.55f:rf(1.10f,1.55f);tone("laser",false,e.x);
     }
     if(death<=0&&std::abs(e.x-shipx)<(e.kind==22?44.f:e.kind==23?20.f:36.f)&&
        std::abs(e.y-shipy)<(e.kind==22?57.f:e.kind==23?33.f:22.f))life_hit();
@@ -1067,7 +1079,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
       float dx=shipx-e.x,dy=shipy-e.y,n=std::max(1.f,std::hypot(dx,dy));
       float muzzle=(e.kind==12||e.kind==13)?24.f:29.f;
       fire(e.x+(e.vx<0?muzzle:-muzzle),e.y,dx/n*242,dy/n*242,false);
-      e.fire=(e.kind==10||e.kind==11)?1.95f:rf(1.6f,2.7f);tone("laser");
+      e.fire=(e.kind==10||e.kind==11)?1.95f:rf(1.6f,2.7f);tone("laser",false,e.x);
     }
     // Hitboxes acordes al objeto visible, NO al atlas original de gran tamaño.
     float hx=(e.kind==10||e.kind==11)?25.f:(e.kind==12||e.kind==13)?25.f:24.f;
@@ -1089,7 +1101,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
       float dx=shipx-e.x,dy=shipy-e.y;
       float n=std::max(1.f,std::hypot(dx,dy));
       fire(e.x+(e.vx<0?28.f:-28.f),e.y,dx/n*235,dy/n*235,false);
-      e.fire=rf(1.7f,3.3f);tone("laser");
+      e.fire=rf(1.7f,3.3f);tone("laser",false,e.x);
    }
    // Punto vulnerable de la cabina pequeño, contra el cuerpo real de cada enemigo.
    float bodyHalfX=e.kind==3?39.f:(e.kind==1?25.f:24.f);
@@ -1565,7 +1577,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
  // Menú público: una única opción de campaña; las pruebas de fases se hacen por CLI.
  static constexpr int MENU_ITEMS=5;
  void title(){background();box(0,0,W,H,{1,8,20,130});image("logo",147,52,666,215);
-  const char* names[]={"EMPEZAR","PANTALLA COMPLETA","AJUSTES DE AUDIO","REPRODUCTOR MUSICAL","SALIR"};
+  const char* names[]={"EMPEZAR","PANTALLA COMPLETA","OPCIONES","REPRODUCTOR MUSICAL","SALIR"};
   for(int i=0;i<MENU_ITEMS;++i){
    int y=270+i*36;
    box(265,y,430,31,i==menuIndex?RGBA{20,66,93,238}:RGBA{5,24,43,224},i==menuIndex?CYAN:DIM);
@@ -1714,7 +1726,12 @@ void message(int role,const std::string&who,const std::string&msg,float duration
    text("ESPACIO / A  ·  CONTINUAR      ESC  ·  TÍTULO",930,514,17,{255,244,225,245},2);
    if(stateTime<0.8f){int darkness=int(250.f*std::clamp(1.f-stateTime/.8f,0.f,1.f));box(0,0,W,H,{0,0,0,darkness});}
  }
- void render(){switch(mode){case TITLE:title();break;case AUDIO_OPTIONS:audio_options();break;case JUKEBOX:jukebox();break;case INTRO:intro();break;case PLAY:case BOSS:case BOSS_DEATH:draw_play();break;case BOSS_INTRO:boss_intro();break;case DEAD:endscreen(false);break;case WIN:endscreen(true);break;case FINAL_CREDITS:final_credits();break;}}
+ void render(){switch(mode){case TITLE:title();break;case AUDIO_OPTIONS:audio_options();break;case JUKEBOX:jukebox();break;case INTRO:intro();break;case PLAY:case BOSS:case BOSS_DEATH:draw_play();break;case BOSS_INTRO:boss_intro();break;case DEAD:endscreen(false);break;case WIN:endscreen(true);break;case FINAL_CREDITS:final_credits();break;}
+    if(scanlines && scanlineTexture){
+      SDL_SetTextureAlphaMod(scanlineTexture,uint8_t(scanlines==1?70:scanlines==2?125:185));
+      SDL_Rect rect{0,0,W,H};SDL_RenderCopy(ren,scanlineTexture,nullptr,&rect);
+    }
+  }
  void toggleFullscreen(){fullscreen=!fullscreen;int ret=SDL_SetWindowFullscreen(win,fullscreen?0x1001:0);if(ret){fullscreen=!fullscreen;std::cerr<<"Pantalla completa: "<<SDL_GetError()<<"\n";}}
  void key(int code){ // SDL keysyms ASCII + especiales
   if(code==1073741892){toggleFullscreen();return;} // F11
@@ -1743,11 +1760,15 @@ void message(int role,const std::string&who,const std::string&msg,float duration
      return;
    }
    if(code==27){back_to_title();return;}
-   if(code==1073741905||code=='s')menuOption=(menuOption+1)%5;
-   if(code==1073741906||code=='w')menuOption=(menuOption+4)%5;
-   if(code==1073741904)edit_volume(menuOption,-1);
-   if(code==1073741903)edit_volume(menuOption,1);
-   if(code==13||code==32){if(menuOption==3)set_audio_enabled(!sound);if(menuOption==4)back_to_title();}
+   if(code==1073741905||code=='s')menuOption=(menuOption+1)%7;
+   if(code==1073741906||code=='w')menuOption=(menuOption+6)%7;
+   if((code==1073741904||code==1073741903)&&menuOption<3)edit_volume(menuOption,code==1073741903?1:-1);
+    if((code==1073741904||code==1073741903)&&menuOption==5){scanlines=(scanlines+(code==1073741903?1:3))%4;save_audio_settings();}
+    if((code==13||code==32||code==1073741904||code==1073741903)&&menuOption==4){
+      if(auddev)SDL_LockAudioDevice(auddev);stereoSpatial=!stereoSpatial;
+      if(auddev)SDL_UnlockAudioDevice(auddev);save_audio_settings();
+    }
+    if(code==13||code==32){if(menuOption==3)set_audio_enabled(!sound);if(menuOption==5){scanlines=(scanlines+1)%4;save_audio_settings();}if(menuOption==6)back_to_title();}
   }else if(mode==JUKEBOX){
    if(code==27){back_to_title();return;}
    if(code==1073741905||code=='s')playerIndex=(playerIndex+1)%JUKE_COUNT;
@@ -2544,4 +2565,25 @@ if(shotMode=="--capture-intro")start();if(shotMode=="--capture-fase2"||shotMode=
   return 0;
  }
 };
-int main(int argc,char**argv){Game g;return g.run(argc,argv);}
+int main(int argc,char**argv){Game g;return g.run(argc,argv);}  void audio_options(){background();box(0,0,W,H,{0,6,18,191});
+   text("OPCIONES · SONIDO Y VÍDEO",480,37,35,CYAN,1);
+   text("BANDA SONORA: FUTUREDARK · GRIT NOVA ENGINE",480,85,17,AMBER,1);
+   const char* names[]={"VOLUMEN GENERAL","MÚSICA","EFECTOS","SONIDO","ESTÉREO ESPACIAL","SCANLINES","VOLVER AL TÍTULO"};
+   const char* modes[]={"DESACTIVADO","SUAVE","ARCADE","CRT INTENSO"};
+   for(int i=0;i<7;i++){
+     int y=116+i*54;bool selected=i==menuOption;
+     box(115,y,730,49,selected?RGBA{16,49,76,248}:RGBA{4,23,42,226},selected?CYAN:DIM);
+     text(names[i],144,y+13,21,selected?WHITE:DIM);
+     if(i<3){
+       int volume=i==0?masterVolume:i==1?musicVolume:effectsVolume;
+       box(440,y+19,270,12,{18,35,54,255},{77,115,146,255});
+       box(442,y+21,int(266*volume/100.f),8,selected?AMBER:CYAN);
+       text(std::to_string(volume)+"%",801,y+12,22,selected?AMBER:WHITE,2);
+     }else if(i==3)text(sound?"ACTIVADO":"SILENCIADO",800,y+12,21,sound?GREEN:RED,2);
+     else if(i==4)text(stereoSpatial?"SÍ":"NO",800,y+12,21,stereoSpatial?GREEN:AMBER,2);
+     else if(i==5)text(modes[scanlines],800,y+12,21,scanlines?CYAN:DIM,2);
+   }
+   text("CURSORES: ELEGIR Y AJUSTAR · ENTER: CAMBIAR · ESC: VOLVER",480,498,17,AMBER,1);
+   text("LOS CAMBIOS SE GUARDAN AUTOMÁTICAMENTE",480,522,15,DIM,1);
+  }
+
