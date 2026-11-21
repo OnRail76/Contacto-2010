@@ -1,5 +1,5 @@
 // CONTACTO 2010 · Fases 1 a 5 — Motor Linux nativo SDL2
-// © 2026 Tony C. Ware · Versión V1.1 · MIT
+// © 2026 Tony C. Ware · Versión V1.2 PREVIEW · MIT
 // Sin navegador, Python, pip ni conexión a Internet.
 #include <png.h>
 #include <vorbis/vorbisfile.h>
@@ -128,7 +128,7 @@ public:
  }
  bool init(){
   if(SDL_Init(0x20|0x2000|0x10)!=0){std::cerr<<"SDL_Init: "<<SDL_GetError()<<"\n";return false;}
-  win=SDL_CreateWindow("CONTACTO 2010 · V1.1 · Tony C. Ware",0x2FFF0000,0x2FFF0000,1280,720,0x4|0x20);
+  win=SDL_CreateWindow("CONTACTO 2010 · V1.2 PREVIEW · Tony C. Ware",0x2FFF0000,0x2FFF0000,1280,720,0x4|0x20);
   if(!win){std::cerr<<"SDL_Window: "<<SDL_GetError()<<"\n";return false;}
   ren=SDL_CreateRenderer(win,-1,2|4);
   if(!ren)ren=SDL_CreateRenderer(win,-1,1);
