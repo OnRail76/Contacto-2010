@@ -2,6 +2,15 @@ name: Windows EXE x64 V1.1
 on:
   push:
     branches: [main]
+    paths:
+      - 'fuentes/**'
+      - 'motor/**'
+      - 'assets/**'
+      - 'banda_sonora_original/**'
+      - 'packaging/**'
+      - 'COMPILAR_LINUX.sh'
+      - 'lib/**'
+      - '.github/workflows/windows.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -55,11 +64,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload v1.1 dist/CONTACTO_2010_V1.1_WINDOWS_x64.zip --clobber
-      - name: Actualizar descripcion oficial de la Release
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release edit v1.1 --notes-file NOTAS_RELEASE_V1.1.md
       - name: Publicar checksum de Windows
         shell: pwsh
         env:
