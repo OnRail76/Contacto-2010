@@ -51,3 +51,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload v1.1 dist/appimage/Contacto_2010_V1.1-x86_64.AppImage --clobber
+      - name: Publicar checksum del AppImage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist/appimage
+          sha256sum Contacto_2010_V1.1-x86_64.AppImage > SHA256_APPIMAGE_V1.1.txt
+          gh release upload v1.1 SHA256_APPIMAGE_V1.1.txt --clobber

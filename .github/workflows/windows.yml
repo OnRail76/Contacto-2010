@@ -55,3 +55,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload v1.1 dist/CONTACTO_2010_V1.1_WINDOWS_x64.zip --clobber
+      - name: Actualizar descripcion oficial de la Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit v1.1 --notes-file NOTAS_RELEASE_V1.1.md
+      - name: Publicar checksum de Windows
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $hash = (Get-FileHash 'dist/CONTACTO_2010_V1.1_WINDOWS_x64.zip' -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  CONTACTO_2010_V1.1_WINDOWS_x64.zip" | Set-Content -Encoding ascii 'dist/SHA256_WINDOWS_V1.1.txt'
+          gh release upload v1.1 dist/SHA256_WINDOWS_V1.1.txt --clobber
