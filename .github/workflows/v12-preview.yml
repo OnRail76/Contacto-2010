@@ -27,6 +27,9 @@ jobs:
           ./CONTACTO_2010_LINUX --self-test-estereo-crt
           ./CONTACTO_2010_LINUX --self-test-menu
           ./CONTACTO_2010_LINUX --self-test
+          ./CONTACTO_2010_LINUX --self-test-bso
+          ./CONTACTO_2010_LINUX --self-test-jingles
+          ./CONTACTO_2010_LINUX --self-test-jingles-nuevos
       - name: Crear AppImage experimental sin publicar
         run: |
           set -euo pipefail
@@ -82,6 +85,8 @@ jobs:
           ./CONTACTO_2010.exe --self-test-estereo-crt
           ./CONTACTO_2010.exe --self-test-menu
           ./CONTACTO_2010.exe --self-test
+          ./CONTACTO_2010.exe --self-test-bso
+          ./CONTACTO_2010.exe --self-test-jingles
       - name: ZIP de preview
         run: |
           cd dist/windows
