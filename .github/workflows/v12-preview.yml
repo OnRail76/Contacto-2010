@@ -1,0 +1,94 @@
+name: CONTACTO 2010 V1.2 experimental - Linux y Windows
+on:
+  pull_request:
+    paths:
+      - 'fuentes/**'
+      - 'motor/**'
+      - 'packaging/**'
+      - '.github/workflows/v12-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias nativas
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev python3 curl
+      - name: Compilar y comprobar audio y scanlines
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -euo pipefail
+          bash COMPILAR_LINUX.sh
+          ./CONTACTO_2010_LINUX --self-test-estereo-crt
+          ./CONTACTO_2010_LINUX --self-test-menu
+          ./CONTACTO_2010_LINUX --self-test
+      - name: Crear AppImage experimental sin publicar
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-all-errors -o /tmp/appimagetool-x86_64.AppImage \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool-x86_64.AppImage
+          APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
+          mv dist/appimage/Contacto_2010_V1.1-x86_64.AppImage dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage
+      - name: Prueba de AppImage real
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage --self-test-estereo-crt
+          dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage --self-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2-PREVIEW-Linux-x86_64
+          path: dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage
+          compression-level: 0
+          if-no-files-found: error
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-binutils
+            zip
+      - name: Compilar y empaquetar version experimental
+        run: |
+          bash packaging/windows/COMPILAR_WINDOWS.sh
+          bash packaging/windows/EMPAQUETAR_WINDOWS.sh
+          sed -i 's/V1.1/V1.2 PREVIEW/g' dist/windows/CONTACTO_2010_V1.1_WINDOWS_x64/LEEME_WINDOWS.txt
+      - name: Pruebas Windows sin monitor ni dispositivo de audio
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          cd dist/windows/CONTACTO_2010_V1.1_WINDOWS_x64
+          ./CONTACTO_2010.exe --self-test-estereo-crt
+          ./CONTACTO_2010.exe --self-test-menu
+          ./CONTACTO_2010.exe --self-test
+      - name: ZIP de preview
+        run: |
+          cd dist/windows
+          mv CONTACTO_2010_V1.1_WINDOWS_x64 CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64
+          zip -qr CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64.zip CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2-PREVIEW-Windows-x64
+          path: dist/windows/CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64.zip
+          compression-level: 0
+          if-no-files-found: error
