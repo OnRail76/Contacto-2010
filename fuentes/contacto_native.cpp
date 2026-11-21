@@ -742,7 +742,7 @@ public:
  std::string num(int n){std::ostringstream s;s<<std::setw(7)<<std::setfill('0')<<n;return s.str();}
  void portrait(int role,int frame,int x,int y,int w,int h){
    // AURA-01, computadora de Firebird-01: animacion RGBA 6x2, 12 frames.
-   if(role==3){sprite("aura",6,362,362,frame%12,x,y,w,h);return;}
+   if(role==3){const int side=std::min(w,h);sprite("aura",6,362,362,frame%12,x+(w-side)/2,y+(h-side)/2,side,side);return;}
    sprite("portrait",8,112,140,role*8+frame,x,y,w,h);
   }
  void draw_radio(){if(radio.life<=0)return;
