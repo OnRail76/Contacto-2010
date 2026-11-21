@@ -1,5 +1,7 @@
 # CONTACTO 2010 · V1.1
 
+![Carátula oficial de CONTACTO 2010](documentacion/CONTACTO_2010_CARATULA_OFICIAL.png)
+
 Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C. Ware** y desarrollado en **C++17 y SDL2**, sobre **GRIT NOVA ENGINE**. Música original: **FutureDark**, alias musical de Tony C. Ware. Programación y desarrollo: **GPT-6 · OpenAI**.
 
 ![Captura real de CONTACTO 2010](capturas/CAPTURA_FASE_1.png)
