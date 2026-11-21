@@ -4,6 +4,8 @@
 
 Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C. Ware** y desarrollado en **C++17 y SDL2**, sobre **GRIT NOVA ENGINE**. Música original: **FutureDark**, alias musical de Tony C. Ware. Programación y desarrollo: **GPT-6 · OpenAI**.
 
+**AURA-01**, computadora de a bordo de la Firebird-01, sustituye al personaje de la antigua científica. Mantiene íntegramente sus diálogos, avisos y apariciones, ahora con un ojo rojo animado de 12 fotogramas. [Ficha de AURA-01](documentacion/AURA-01_COMPUTADORA_FIREBIRD.md).
+
 **NOVEDADES V1.2:** banda sonora FutureDark en OGG Vorbis estéreo real a 44,1 kHz; efectos espaciales, reproductor de cassette animado, medidores L/R y scanlines configurables. Nueva carátula y nueva ilustración final con Firebird-01.
 
 [Detalles de V1.2: audio, cassette, scanlines y arte oficial](documentacion/NOVEDADES_V1.2.md).
