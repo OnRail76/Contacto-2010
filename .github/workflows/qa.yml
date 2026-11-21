@@ -39,7 +39,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: |
           set -euo pipefail
-          for test in             --self-test --self-test-fase2 --self-test-fase3 --self-test-fase4 --self-test-fase5             --test-combate-fase2 --test-combate-fase3 --test-combate-fase4 --test-combate-fase5             --self-test-controles --self-test-sierras --self-test-estalactitas             --self-test-halcones --self-test-rayos --self-test-final --self-test-bso             --self-test-firebird --self-test-avisos-escudo --self-test-estereo-crt --self-test-menu --self-test-jingles --self-test-jingles-nuevos --self-test-audio --self-test-disparos; do
+          for test in             --self-test --self-test-fase2 --self-test-fase3 --self-test-fase4 --self-test-fase5             --test-combate-fase2 --test-combate-fase3 --test-combate-fase4 --test-combate-fase5             --self-test-controles --self-test-sierras --self-test-estalactitas             --self-test-halcones --self-test-rayos --self-test-final --self-test-bso             --self-test-firebird --self-test-avisos-escudo --self-test-estereo-crt --self-test-menu --self-test-jingles --self-test-jingles-nuevos --self-test-audio --self-test-disparos --self-test-aura; do
             echo "===== $test ====="
             ./CONTACTO_2010_LINUX "$test"
           done
