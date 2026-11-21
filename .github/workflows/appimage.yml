@@ -1,16 +1,5 @@
 name: AppImage x86_64 V1.1
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'fuentes/**'
-      - 'motor/**'
-      - 'assets/**'
-      - 'banda_sonora_original/**'
-      - 'packaging/**'
-      - 'COMPILAR_LINUX.sh'
-      - 'lib/**'
-      - '.github/workflows/appimage.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -20,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: v1.1
       - name: Dependencias Ubuntu 22.04
         run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev python3 curl
       - name: Compilar Linux
