@@ -85,12 +85,12 @@ void mix_stereo_s16(uint8_t* stream,int bytes,bool enabled,bool stereo,const Sou
   for(int i=0;i<frames;++i){
     float left=0.f,right=0.f;
     if(track && !track->pcm.empty() && !paused){
-      if(pos>=track->pcm.size()){
-        if(loop)pos=0; else track=nullptr;
-      }
+      const size_t frames=track->pcm.size()/size_t(std::max(1,track->channels));
+      if(pos>=frames){if(loop)pos=0;else track=nullptr;}
       if(track){
-        const float value=float(track->pcm[pos++])*musicGain;
-        left+=value;right+=value; // La fuente musical actual es mono.
+        const size_t i=pos++*size_t(track->channels);
+        left+=float(track->pcm[i])*musicGain;
+        right+=float(track->pcm[i+(track->channels==2?1:0)])*musicGain;
       }
     }
     for(auto &v:voices){
