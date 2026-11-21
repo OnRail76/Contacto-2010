@@ -1,4 +1,4 @@
-# CONTACTO 2010 · V1.2
+# CONTACTO 2010 · V1.2.1
 
 ![Carátula oficial de CONTACTO 2010](documentacion/CONTACTO_2010_CARATULA_OFICIAL.png)
 
@@ -16,12 +16,12 @@ Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C
 
 ## Descargar y jugar
 
-[**Release V1.2 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2)
+[**Release V1.2.1 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1)
 
-- [AppImage x86_64 para Linux](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2/Contacto_2010_V1.2-x86_64.AppImage): un único archivo ejecutable; dar permiso con `chmod +x` y abrir.
-- [Windows x64, EXE nativo y DLL en ZIP](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2/CONTACTO_2010_V1.2_WINDOWS_x64.zip): descomprimir entero y abrir `CONTACTO_2010.exe`.
+- [AppImage x86_64 para Linux](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2.1/Contacto_2010_V1.2.1-x86_64.AppImage): un único archivo ejecutable; dar permiso con `chmod +x` y abrir.
+- [Windows x64, EXE nativo y DLL en ZIP](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2.1/CONTACTO_2010_V1.2.1_WINDOWS_x64.zip): descomprimir entero y abrir `CONTACTO_2010.exe`.
 
-Las dos distribuciones V1.2 se construyen y se prueban de forma nativa en GitHub Actions. El EXE no depende de Wine ni de Python.
+Las dos distribuciones V1.2.1 se construyen y se prueban de forma nativa en GitHub Actions. El EXE no depende de Wine ni de Python.
 
 Movimiento: **WASD o cursores**. Disparo: **ESPACIO**. Pausa: **ESC**. Pantalla completa: **F11**. Compatible con mando SDL2 con reconexión.
 
