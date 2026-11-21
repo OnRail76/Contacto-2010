@@ -33,6 +33,7 @@ jobs:
           ./CONTACTO_2010_LINUX --self-test-bso
           ./CONTACTO_2010_LINUX --self-test-jingles
           ./CONTACTO_2010_LINUX --self-test-jingles-nuevos
+          ./CONTACTO_2010_LINUX --self-test-aura
       - name: Capturas reales de cassette y opciones desde SDL2
         env:
           SDL_VIDEODRIVER: dummy
@@ -107,6 +108,7 @@ jobs:
           ./CONTACTO_2010.exe --self-test
           ./CONTACTO_2010.exe --self-test-bso
           ./CONTACTO_2010.exe --self-test-jingles
+          ./CONTACTO_2010.exe --self-test-aura
       - name: ZIP de preview
         run: |
           cd dist/windows
