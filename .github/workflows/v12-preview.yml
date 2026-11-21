@@ -1,4 +1,4 @@
-name: CONTACTO 2010 V1.2 experimental - Linux y Windows
+name: CONTACTO 2010 - Verificacion Linux y Windows
 on:
   pull_request:
     paths:
