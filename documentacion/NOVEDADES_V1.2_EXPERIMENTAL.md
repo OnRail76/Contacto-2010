@@ -1,42 +1,35 @@
-# CONTACTO 2010 — desarrollo experimental V1.2
+# CONTACTO 2010 — V1.2 experimental: FutureDark OGG y cassette
 
-> Rama de trabajo: no reemplaza a la Release oficial V1.1. Sin cambios en fases, enemigos, jefes, física ni materiales artísticos.
+> Implementación en `desarrollo/v1.2-estereo-crt`. Esta rama **no altera la Release V1.1**.
 
-## Sonido estéreo
+## Música en estéreo auténtico
 
-- Salida nativa SDL2 en **dos canales PCM S16**, 22.050 Hz. Se conserva la frecuencia de los archivos WAV actuales para evitar remuestrear durante las partidas.
-- Efectos con panorámica de posición: disparo de la Firebird-01, explosiones enemigas y disparos enemigos. En el centro suenan por los dos canales; hacia los lados se atenúa gradualmente el canal lejano.
-- Mezclador de **32 voces** y limitador por canal, sin asignaciones dinámicas dentro del callback.
-- Interruptor **ESTÉREO ESPACIAL**: al apagarlo, ambos canales reciben exactamente el mismo resultado. No modifica el mezclado original de las canciones.
-- Las pistas WAV actuales se almacenan en mono. Se duplican a L/R para reproducirlas en equipos estéreo; **esto no recupera un máster estéreo original**. Una remasterización musical estéreo real requiere nuevos archivos originales de audio.
+- Música de las cinco fases, jefes, título, Game Over, victoria y epílogo: **OGG Vorbis estéreo de FutureDark** en `banda_sonora_original/`.
+- Mezcla SDL2 PCM de **44.100 Hz / 16 bits / 2 canales**.
+- Decodificación con libvorbisfile; **solo se conserva en RAM la pista activa**. Si una fuente OGG viene a otra frecuencia admitida, se remuestrea al cambiar de canción, nunca dentro del callback.
+- Los efectos WAV mono de 22.050 Hz se convierten al arrancar a 44.100 Hz y mantienen su panorámica espacial.
+- Los ejecutables de prueba incluyen archivos OGG comprimidos y excluyen los antiguos WAV de música del paquete para reducir tamaño. Los WAV originales del repositorio quedan intactos por seguridad.
+- Las grabaciones OGG deben contener dos canales; el motor informa de cualquier archivo incorrecto. La salida espacial de los efectos sigue siendo opcional desde OPCIONES.
 
-## Scanlines de bajo coste
+## Reproductor de cassette animado
 
-- Filtro opcional aplicado al fotograma ya compuesto: DESACTIVADO / SUAVE / ARCADE / CRT INTENSO.
-- Una sola textura de 1 × 540 creada al iniciar y una operación de dibujado SDL2 al finalizar cada fotograma. La textura se escala por GPU a 960 × 540 sin bucles de píxeles en la CPU durante el juego.
-- Aplica el efecto a título, menús, HUD, cinemáticas y gameplay por igual; no modifica los sprites ni las colisiones.
-- No se incluyen curvatura, aberración cromática ni desenfoque: evitarían mantener la legibilidad de los indicadores y podrían perjudicar los FPS.
+En el título: **REPRODUCTOR MUSICAL**.
 
-## Opciones y persistencia
+- Deck de estética militar retrofuturista, cassette insertada, carretes de seis brazos giratorios y simulación de cinta recogida conforme avanza el tema.
+- Pantalla de pista, LEDs, barra de progreso, contador `MM:SS / MM:SS` y medidores de nivel **L/R** obtenidos de las muestras estéreo actuales.
+- Las bobinas giran mientras suena la canción, y quedan inmóviles al pausar o detener la reproducción.
+- **Arriba/abajo:** elegir pista. **Izquierda/derecha:** anterior/siguiente y reproducir. **ENTER/A:** reproducir. **P:** pausa/reanudar. **X:** detener. **ESC/B:** regresar al título.
+- Mantiene las diez composiciones originales y sus títulos. El reproductor no altera los bucles automáticos de música del juego.
 
-Desde el título: **OPCIONES**. Cursores arriba/abajo eligen ajuste, izquierda/derecha ajustan valores, ENTER activa, ESC vuelve. El mando usa los controles de menú ya existentes.
+## Opciones CRT
 
-Los parámetros se conservan en `audio_config.ini` (compatibilidad con los ajustes anteriores):
+Estéreo espacial SÍ/NO, sonido y volúmenes, y cuatro intensidades de scanlines (OFF, suave, arcade, intenso). Persistencia compatible con el archivo previo `audio_config.ini`.
 
-```ini
-master 100
-music 100
-effects 100
-enabled 1
-stereo 1
-scanlines 1
-```
+## Compatibilidad y verificaciones
 
-El modo por defecto usa estéreo espacial y scanlines suaves. El archivo se carga sin exigir las nuevas claves para mantener las configuraciones existentes.
+- Linux x86_64: compilación nativa y AppImage con dependencias libvorbisfile, libvorbis y libogg incluidas.
+- Windows x64: EXE compilado con MSYS2 UCRT64 y DLL nativas en el ZIP.
+- Los paquetes experimentales se generan como **artifacts** del workflow `v12-preview.yml`; no modifican la Release V1.1 ni se convierten en publicación definitiva.
+- Pruebas: fases y jefes, banda sonora, estéreo panorámico, scanlines, jingles, reproducción/pausa/stop y arranque en ambas plataformas.
 
-## Verificaciones
-
-- `--self-test-estereo-crt`: diferencia de panorámica a izquierda/derecha, salida idéntica en mono, y textura disponible.
-- `--self-test-menu` y pruebas anteriores de CONTACTO 2010.
-- CI de preview Linux AppImage y Windows EXE en GitHub Actions **sin subida a la Release V1.1**. Los ficheros de prueba aparecen como artefactos de la ejecución de la PR.
-- Pendiente de validar en una partida real: monitor, auriculares, mando, mezcla con oleadas densas, claridad de interfaz y FPS antes de etiquetar V1.2.
+Se recomienda una comprobación final con auriculares y partida real antes de etiquetar V1.2.
