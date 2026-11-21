@@ -33,7 +33,7 @@ La portada Firebird-01 se muestra al principio de este README. La escena final o
 
 ## Documentación
 
-[**Atlas, memoria técnica y manual oficial V1.2.1 (PDF de 52 páginas)**](documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
+[**Atlas, memoria técnica y manual oficial V1.2.1 (PDF de 48 páginas, revisado y sin spoilers)**](documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
 
 
 [Atlas, memoria y manual de la edición V1.1 (PDF de 44 páginas)](documentacion/ATLAS_MEMORIA_MANUAL_CONTACTO_2010_V1.1.pdf) se conserva como documentación histórica del diseño anterior. Para las novedades de V1.2, consulta el documento actualizado enlazado arriba.
