@@ -1603,21 +1603,27 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     text("EN PARTIDA, F9 SIGUE ACTIVANDO LA INVULNERABILIDAD",480,513,16,DIM,1);
     return;
   }
-  text("AJUSTES DE AUDIO",480,53,43,CYAN,1);text("BANDA SONORA: FUTUREDARK",480,106,20,AMBER,1);
-  const char* names[]={"VOLUMEN GENERAL","MÚSICA","EFECTOS","SONIDO","VOLVER AL TÍTULO"};
-  for(int i=0;i<5;i++){
-   int y=148+i*66;bool selected=i==menuOption;
-   box(115,y,730,56,selected?RGBA{16,49,76,248}:RGBA{4,23,42,226},selected?CYAN:DIM);
-   text(names[i],144,y+15,24,selected?WHITE:DIM);
-   if(i<3){int volume=i==0?masterVolume:i==1?musicVolume:effectsVolume;
-     box(430,y+22,290,13,{18,35,54,255},{77,115,146,255});
-     box(432,y+24,int(286*volume/100.f),9,selected?AMBER:CYAN);
-     text(std::to_string(volume)+"%",802,y+14,23,selected?AMBER:WHITE,2);
-   }else if(i==3){text(sound?"ACTIVADO":"SILENCIADO",800,y+14,23,sound?GREEN:RED,2);}
+   text("OPCIONES · SONIDO Y VÍDEO",480,37,35,CYAN,1);
+   text("BANDA SONORA: FUTUREDARK · GRIT NOVA ENGINE",480,85,17,AMBER,1);
+   const char* names[]={"VOLUMEN GENERAL","MÚSICA","EFECTOS","SONIDO","ESTÉREO ESPACIAL","SCANLINES","VOLVER AL TÍTULO"};
+   const char* modes[]={"DESACTIVADO","SUAVE","ARCADE","CRT INTENSO"};
+   for(int i=0;i<7;i++){
+     int y=116+i*54;bool selected=i==menuOption;
+     box(115,y,730,49,selected?RGBA{16,49,76,248}:RGBA{4,23,42,226},selected?CYAN:DIM);
+     text(names[i],144,y+13,21,selected?WHITE:DIM);
+     if(i<3){
+       int volume=i==0?masterVolume:i==1?musicVolume:effectsVolume;
+       box(440,y+19,270,12,{18,35,54,255},{77,115,146,255});
+       box(442,y+21,int(266*volume/100.f),8,selected?AMBER:CYAN);
+       text(std::to_string(volume)+"%",801,y+12,22,selected?AMBER:WHITE,2);
+     }else if(i==3)text(sound?"ACTIVADO":"SILENCIADO",800,y+12,21,sound?GREEN:RED,2);
+     else if(i==4)text(stereoSpatial?"SÍ":"NO",800,y+12,21,stereoSpatial?GREEN:AMBER,2);
+     else if(i==5)text(modes[scanlines],800,y+12,21,scanlines?CYAN:DIM,2);
+   }
+   text("CURSORES: ELEGIR Y AJUSTAR · ENTER: CAMBIAR · ESC: VOLVER",480,498,17,AMBER,1);
+   text("LOS CAMBIOS SE GUARDAN AUTOMÁTICAMENTE",480,522,15,DIM,1);
   }
-  text("CURSORES: ELEGIR Y AJUSTAR · ENTER ACTIVAR · ESC VOLVER",480,491,19,AMBER,1);
-  text("LOS CAMBIOS SE GUARDAN AUTOMÁTICAMENTE",480,514,16,DIM,1);
- }
+
  static std::string fmt_time(size_t samples){size_t t=samples/22050;return std::to_string(t/60)+":"+(t%60<10?"0":"")+std::to_string(t%60);}
  void jukebox(){background();box(0,0,W,H,{0,6,18,210});
   text("REPRODUCTOR MUSICAL",480,31,40,CYAN,1);
@@ -2581,25 +2587,4 @@ if(shotMode=="--capture-intro")start();if(shotMode=="--capture-fase2"||shotMode=
   return 0;
  }
 };
-int main(int argc,char**argv){Game g;return g.run(argc,argv);}  void audio_options(){background();box(0,0,W,H,{0,6,18,191});
-   text("OPCIONES · SONIDO Y VÍDEO",480,37,35,CYAN,1);
-   text("BANDA SONORA: FUTUREDARK · GRIT NOVA ENGINE",480,85,17,AMBER,1);
-   const char* names[]={"VOLUMEN GENERAL","MÚSICA","EFECTOS","SONIDO","ESTÉREO ESPACIAL","SCANLINES","VOLVER AL TÍTULO"};
-   const char* modes[]={"DESACTIVADO","SUAVE","ARCADE","CRT INTENSO"};
-   for(int i=0;i<7;i++){
-     int y=116+i*54;bool selected=i==menuOption;
-     box(115,y,730,49,selected?RGBA{16,49,76,248}:RGBA{4,23,42,226},selected?CYAN:DIM);
-     text(names[i],144,y+13,21,selected?WHITE:DIM);
-     if(i<3){
-       int volume=i==0?masterVolume:i==1?musicVolume:effectsVolume;
-       box(440,y+19,270,12,{18,35,54,255},{77,115,146,255});
-       box(442,y+21,int(266*volume/100.f),8,selected?AMBER:CYAN);
-       text(std::to_string(volume)+"%",801,y+12,22,selected?AMBER:WHITE,2);
-     }else if(i==3)text(sound?"ACTIVADO":"SILENCIADO",800,y+12,21,sound?GREEN:RED,2);
-     else if(i==4)text(stereoSpatial?"SÍ":"NO",800,y+12,21,stereoSpatial?GREEN:AMBER,2);
-     else if(i==5)text(modes[scanlines],800,y+12,21,scanlines?CYAN:DIM,2);
-   }
-   text("CURSORES: ELEGIR Y AJUSTAR · ENTER: CAMBIAR · ESC: VOLVER",480,498,17,AMBER,1);
-   text("LOS CAMBIOS SE GUARDAN AUTOMÁTICAMENTE",480,522,15,DIM,1);
-  }
-
+int main(int argc,char**argv){Game g;return g.run(argc,argv);}
