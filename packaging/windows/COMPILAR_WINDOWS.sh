@@ -8,5 +8,5 @@ windres -I packaging/windows -i packaging/windows/contacto2010.rc \
 "${CXX:-g++}" -std=c++17 -O2 -pipe \
   fuentes/contacto_native.cpp motor/grit_nova_engine.cpp \
   packaging/windows/contacto2010_res.o \
-  -o CONTACTO_2010.exe -lSDL2 -lpng -lz -mwindows
+  -o CONTACTO_2010.exe -lSDL2 -lpng -lz -lvorbisfile -mwindows
 echo 'CONTACTO 2010 Windows x64: EXE compilado.'
