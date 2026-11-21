@@ -1722,24 +1722,11 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   line(48,123,614,123,{192,218,210,220});
   box(62,138,539,230,{3,10,20,255},{103,163,171,255});
   box(72,148,519,210,{29,41,47,255},{150,174,171,255});
-  // Bisel industrial y tornilleria discretos.
-  for(int sx : {49,609})for(int sy : {132,450}){
-   box(sx-4,sy-4,9,9,{44,62,67,255},{129,157,158,255});
-   line(sx-2,sy+2,sx+2,sy-2,{183,195,190,255});
-  }
-  line(75,151,585,151,{187,215,209,180});
-  line(75,354,585,354,{40,79,91,255});
   // Ventana del cassette de resina ahumada y etiqueta de la pista.
   box(89,162,484,46,{9,22,33,255},{72,130,157,255});
   text("FUTUREDARK  /  2010   •   SIDE A",331,168,20,AMBER,1);
   text("CHROMIUM DIOXIDE · STEREO 44.1 kHz",331,188,14,CYAN,1);
   box(100,222,462,112,{4,10,16,255},{91,130,135,255});
-  line(105,227,555,227,{40,65,74,255});
-  line(104,331,558,331,{119,146,146,200});
-  for(int x : {119,543}){
-   box(x-3,239,7,7,{20,28,31,255},{92,111,111,255});
-   line(x-2,245,x+2,241,{166,179,173,255});
-  }
   size_t at=0,total=0;bool live=false,paused=false;float meterL=0,meterR=0;
   if(auddev)SDL_LockAudioDevice(auddev);
   paused=musicPaused;live=musicTrack!=nullptr;at=musicPos;
@@ -1780,26 +1767,13 @@ void message(int role,const std::string&who,const std::string&msg,float duration
       line(cx+int(10*std::cos(a)),cy+int(10*std::sin(a)),
            cx+int((radius-7)*std::cos(a)),cy+int((radius-7)*std::sin(a)),{202,215,208,255});
     }
-    // Buje dentado sincronizado con los radios del carrete.
-    for(int i=0;i<12;++i){
-      const double a=double(i)*PI/6.0+double(reelAngle);
-      line(cx+int(7*std::cos(a)),cy+int(7*std::sin(a)),
-           cx+int(12*std::cos(a)),cy+int(12*std::sin(a)),{133,171,176,255});
-    }
-    box(cx-6,cy-6,12,12,{21,36,43,255},{177,215,221,255});
+    box(cx-8,cy-8,16,16,{15,31,44,255},{177,215,221,255});
     box(cx-3,cy-3,6,6,{246,190,87,255});
   };
   reel(213,278,48,.77f-.29f*progress);
   reel(447,278,48,.48f+.29f*progress);
   box(273,270,111,15,{19,24,26,255},{73,92,91,255});
   line(263,315,397,315,{87,73,58,255});
-  // Rodillos y cinta, evitando efectos que puedan tapar la pista.
-  for(int x : {294,374}){
-   box(x-5,313,11,11,{40,45,43,255},{124,140,133,255});
-   box(x-2,316,5,5,{190,164,116,255});
-  }
-  line(298,319,369,319,{132,97,62,255});
-  line(111,232,180,232,{93,149,156,100});
   box(103,338,457,12,{9,25,31,255},{75,121,133,255});
   if(total)box(105,340,int(453*progress),8,AMBER);
   box(65,378,532,77,{8,25,34,255},{72,134,149,255});
@@ -1808,11 +1782,8 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   const char* labels[]={"|<<","PLAY","PAUSA","STOP",">>|"};
   for(int i=0;i<5;++i){
     const int x=84+i*101;
-    const bool active=(i==1&&live&&!paused)||(i==2&&live&&paused)||(i==3&&!live&&playingIndex>=0);
-    box(x,416,86,32,active?RGBA{31,70,68,255}:RGBA{27,49,61,255},{133,174,174,255});
-    line(x+2,418,x+83,418,active?RGBA{104,216,174,255}:RGBA{89,122,128,255});
-    line(x+2,445,x+83,445,{7,20,31,255});
-    text(labels[i],x+43,424,17,active?GREEN:WHITE,1);
+    box(x,416,86,32,{27,49,61,255},{133,174,174,255});
+    text(labels[i],x+43,424,17,i==1&&live&&!paused?GREEN:WHITE,1);
   }
   box(646,103,286,371,{7,19,34,246},{80,150,175,255});
   text("SELECCIÓN DE CINTA",789,116,21,CYAN,1);
