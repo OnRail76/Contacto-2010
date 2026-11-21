@@ -1,0 +1,9 @@
+DESARROLLO Y ORIGINALES
+=======================
+- Los materiales originales de Tony C. Ware se conservan en material_original/.
+- El audio original de FutureDark está separado en ../banda_sonora_original/.
+- Fuentes y atlas en ../contacto_native.cpp y ../assets/.
+- Los antiguos scripts de reparación de fase 5 que introdujeron artefactos
+  NO forman parte de esta distribución limpia.
+- Las intermisiones, los textos de briefing y las transmisiones de radio
+  se mantienen sin cambios en la v0.15.1, para una revisión posterior.

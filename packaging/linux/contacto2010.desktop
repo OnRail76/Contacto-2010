@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CONTACTO 2010
+GenericName=Matamarcianos horizontal
+Comment=Juego arcade espacial CONTACTO 2010 de Tony C. Ware
+Exec=contacto2010
+Icon=contacto2010
+Terminal=false
+Categories=Game;ArcadeGame;
+StartupNotify=true

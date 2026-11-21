@@ -1,0 +1,25 @@
+name: Pruebas C++17 SDL2
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  linux-qa:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias
+        run: sudo apt-get update && sudo apt-get install -y g++ libsdl2-2.0-0 libpng-dev
+      - name: Compilar juego y núcleo GRIT NOVA
+        run: |
+          bash COMPILAR_LINUX.sh
+          bash motor/COMPILAR_MOTOR.sh
+      - name: Pruebas automáticas sin pantalla ni audio físico
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          for test in --self-test --self-test-fase2 --self-test-fase3 --self-test-fase4 --self-test-fase5 --self-test-controles --self-test-sierras --self-test-estalactitas --self-test-halcones --self-test-rayos --self-test-final --self-test-bso; do
+            ./CONTACTO_2010_LINUX "$test"
+          done

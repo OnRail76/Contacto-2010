@@ -1,0 +1,24 @@
+name: Construir AppImage x86_64
+on:
+  workflow_dispatch:
+jobs:
+  appimage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias
+        run: sudo apt-get update && sudo apt-get install -y g++ libsdl2-2.0-0 libpng-dev python3
+      - name: Compilar
+        run: bash COMPILAR_LINUX.sh
+      - name: Preparar AppDir
+        run: python3 packaging/appimage/crear_appdir.py
+      - name: Descargar herramienta oficial y construir
+        run: |
+          curl -fL --retry 4 -o /tmp/appimagetool.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool.AppImage
+          APPIMAGETOOL=/tmp/appimagetool.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
+      - name: Conservar resultado descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.1-AppImage
+          path: dist/appimage/Contacto_2010_V1.1-x86_64.AppImage

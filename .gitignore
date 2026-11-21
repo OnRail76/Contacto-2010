@@ -1,0 +1,12 @@
+/CONTACTO_2010_LINUX
+/motor/*.o
+/motor/*.a
+/motor/probar_motor
+/dist/
+/audio_config.ini
+/record.dat
+*.log
+*.tmp
+*.swp
+__pycache__/
+.DS_Store
