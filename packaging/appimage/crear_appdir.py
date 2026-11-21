@@ -9,7 +9,8 @@ if root.exists():shutil.rmtree(root)
 (game/'assets').mkdir(parents=True)
 shutil.copy2(src/'CONTACTO_2010_LINUX',game/'CONTACTO_2010_LINUX')
 os.chmod(game/'CONTACTO_2010_LINUX',0o755)
-shutil.copytree(src/'assets',game/'assets',dirs_exist_ok=True)
+shutil.copytree(src/'assets',game/'assets',dirs_exist_ok=True,ignore=shutil.ignore_patterns('musica_*.wav'))
+shutil.copytree(src/'banda_sonora_original',game/'banda_sonora_original',dirs_exist_ok=True)
 shutil.copytree(src/'lib',game/'lib',dirs_exist_ok=True)
 # Empaquetar la SDL2 del sistema del runner Ubuntu 22.04, NO la biblioteca
 # procedente de otra distribucion (dependia de GLIBC_2.38).
@@ -20,7 +21,7 @@ def find_system_library(soname):
             candidate=Path(line.split('=>',1)[1].strip())
             if candidate.exists():return candidate
     raise RuntimeError('No se encuentra biblioteca del sistema: '+soname)
-for soname in ('libSDL2-2.0.so.0','libpng16.so.16','libz.so.1'):
+for soname in ('libSDL2-2.0.so.0','libpng16.so.16','libz.so.1','libvorbisfile.so.3','libvorbis.so.0','libogg.so.0'):
     shutil.copy2(find_system_library(soname),game/'lib'/soname)
 (game/'LEEME.txt').write_text('CONTACTO 2010 V1.1 · Ejecutable y recursos de juego. Música FutureDark normalizada en assets/audio/. Datos persistentes: XDG_DATA_HOME/contacto2010.\n',encoding='utf-8')
 (appdir/'AppRun').write_text('''#!/bin/sh
@@ -32,6 +33,7 @@ mkdir -p "$DATAROOT"
 # La imagen es de sólo lectura. Recorremos desde la carpeta de datos del usuario,
 # con los assets enlazados desde el montaje AppImage (no copiados cada vez).
 ln -sfn "$GAMEROOT/assets" "$DATAROOT/assets"
+ln -sfn "$GAMEROOT/banda_sonora_original" "$DATAROOT/banda_sonora_original"
 export LD_LIBRARY_PATH="$GAMEROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 cd "$DATAROOT"
 exec "$GAMEROOT/CONTACTO_2010_LINUX" "$@"
