@@ -2,6 +2,11 @@
 // © 2026 Tony C. Ware · Versión V1.2 PREVIEW · MIT
 // Sin navegador, Python, pip ni conexión a Internet.
 #include <png.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <cstdio>
+#endif
 #include <vorbis/vorbisfile.h>
 #include <cstdint>
 #include <cstring>
@@ -361,9 +366,22 @@ public:
   const char* rel=ogg_path(name);if(!rel)return false;
   const std::string filename="banda_sonora_original/"+std::string(rel);
   OggVorbis_File vf{};
+#ifdef _WIN32
+  // Windows: ov_fopen usa ANSI; abrir con ruta UTF-16 para nombres con tildes.
+  const int chars=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,filename.c_str(),-1,nullptr,0);
+  if(chars<=0){std::cerr<<"Nombre OGG UTF-8 no valido: "<<filename<<"\n";return false;}
+  std::wstring wide(size_t(chars),L'\0');
+  if(!MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,filename.c_str(),-1,wide.data(),chars))return false;
+  FILE* fd=_wfopen(wide.c_str(),L"rb");
+  if(!fd){std::cerr<<"OGG no disponible: "<<filename<<"\n";return false;}
+  if(ov_open(fd,&vf,nullptr,0)!=0){
+   fclose(fd);std::cerr<<"OGG invalido: "<<filename<<"\n";return false;
+  }
+#else
   if(ov_fopen(filename.c_str(),&vf)!=0){
    std::cerr<<"OGG no disponible: "<<filename<<"\n";return false;
   }
+#endif
   const vorbis_info* info=ov_info(&vf,-1);
   if(!info||info->channels!=2||info->rate<22050||info->rate>96000){
    std::cerr<<"OGG no estereo o incompatible: "<<filename<<"\n";
@@ -2504,7 +2522,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     tone("disparo");tone("laser");tone("explosion");tone("explosion_grande");tone("rayo");
     SDL_LockAudioDevice(auddev);
     int active=0;for(auto &v:voices)if(v.sample)++active;
-    std::vector<uint8_t> rendered(4096*2);
+    std::vector<uint8_t> rendered(4096*4);
     mix_audio(rendered.data(),int(rendered.size()));
     int nonzero=0;for(size_t i=0;i<rendered.size();i+=2)
        if(rendered[i]||rendered[i+1])++nonzero;
