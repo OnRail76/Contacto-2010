@@ -1695,33 +1695,95 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   }
 
  static std::string fmt_time(size_t samples){size_t t=samples/44100;return std::to_string(t/60)+":"+(t%60<10?"0":"")+std::to_string(t%60);}
- void jukebox(){background();box(0,0,W,H,{0,6,18,210});
-  text("REPRODUCTOR MUSICAL",480,31,40,CYAN,1);
-  text("CONTACTO 2010 · BANDA SONORA DE FUTUREDARK",480,76,20,AMBER,1);
-  // 01–06: fases y jefes. 07–09: jingles. 10: Remember Love, epílogo.
-  for(int i=0;i<JUKE_COUNT;++i){int y=108+i*29;bool selected=(i==playerIndex);bool active=(i==playingIndex);
-    box(102,y,755,27,selected?RGBA{19,59,84,247}:RGBA{4,21,40,229},selected?CYAN:DIM);
-    text((i<9?"0":"")+std::to_string(i+1)+".",129,y+4,18,selected?AMBER:DIM);
-    text(jukeName[i],173,y+4,18,selected?WHITE:DIM);
-    if(active)text("ON",818,y+4,17,GREEN);
-  }
-  size_t at=0,total=0;bool live=false,paused=false;
+ void jukebox(){background();box(0,0,W,H,{0,5,14,220});
+  // Deck de cinta espacial / FutureDark. Dibujado con primitivas SDL2.
+  text("FUTUREDARK · CONTACTO 2010",480,24,34,CYAN,1);
+  text("REPRODUCTOR DE CASSETTE · EUROPEAN SPACE FORCE",480,66,17,AMBER,1);
+  box(28,103,607,371,{9,19,32,255},{96,149,170,255});
+  box(39,113,585,350,{17,32,48,255},{34,73,89,255});
+  line(48,123,614,123,{192,218,210,220});
+  box(62,138,539,230,{3,10,20,255},{103,163,171,255});
+  box(72,148,519,210,{29,41,47,255},{150,174,171,255});
+  // Ventana del cassette de resina ahumada y etiqueta de la pista.
+  box(89,162,484,46,{9,22,33,255},{72,130,157,255});
+  text("FUTUREDARK  /  2010   •   SIDE A",331,168,20,AMBER,1);
+  text("CHROMIUM DIOXIDE · STEREO 44.1 kHz",331,188,14,CYAN,1);
+  box(100,222,462,112,{4,10,16,255},{91,130,135,255});
+  size_t at=0,total=0;bool live=false,paused=false;float meterL=0,meterR=0;
   if(auddev)SDL_LockAudioDevice(auddev);
-  paused=musicPaused;live=(musicTrack!=nullptr);at=musicPos;
-  if(playingIndex>=0){auto it=audio.find(jukeFile[playingIndex]);
-   if(it!=audio.end())total=it->second.pcm.size();
-   if(!live)at=total;}
-  if(auddev)SDL_UnlockAudioDevice(auddev);
-  int y=414;
-  box(100,y,759,63,{3,25,46,245},CYAN);
+  paused=musicPaused;live=musicTrack!=nullptr;at=musicPos;
   if(playingIndex>=0){
-   text(std::string(paused?"PAUSA":live?"SONANDO":"FINALIZADA")+" · "+jukeName[playingIndex],118,y+6,20,paused?AMBER:live?GREEN:WHITE);
-   box(120,y+39,585,9,{30,61,78,255});
-   if(total>0)box(120,y+39,int(585*double(at)/double(total)),9,CYAN);
-   text(fmt_time(at)+" / "+fmt_time(total),843,y+31,16,WHITE,2);
-  }else{text("ELIGE UNA PISTA Y PULSA ENTER PARA ESCUCHARLA",480,y+20,20,WHITE,1);}
-  text("CURSORES: PISTA · ENTER OÍR · P PAUSA · X PARAR · ESC SALIR",480,490,18,AMBER,1);
-  text("01–06: BUCLE EN JUEGO · 07–10: UNA VEZ",480,516,17,DIM,1);
+    total=musicData.pcm.size()/2;
+    if(!live)at=total;
+    if(live&&!paused&&musicData.channels==2&&total){
+      const size_t start=std::min(at,total-1);
+      const size_t end=std::min(start+400,total);
+      double sumL=0,sumR=0;
+      for(size_t i=start;i<end;i+=4){
+        sumL+=std::abs(int(musicData.pcm[i*2]));
+        sumR+=std::abs(int(musicData.pcm[i*2+1]));
+      }
+      const double scale=32768.0*double(std::max<size_t>(1,(end-start+3)/4));
+      meterL=float(std::min(1.0,sumL/scale*3.5));
+      meterR=float(std::min(1.0,sumR/scale*3.5));
+    }
+  }
+  if(auddev)SDL_UnlockAudioDevice(auddev);
+  const float progress=total?std::clamp(float(double(at)/double(total)),0.f,1.f):0.f;
+  // Los carretes giran sólo mientras está sonando, y se congelan en pausa/stop.
+  static float reelAngle=0.f;static uint32_t lastTick=0;
+  const uint32_t tick=SDL_GetTicks();
+  if(lastTick && tick>=lastTick && live&&!paused)reelAngle+=std::min(float(tick-lastTick)/1000.f,.08f)*4.3f;
+  lastTick=tick;
+  const auto reel=[&](int cx,int cy,int radius,float fill){
+    const int body=std::max(16,int(radius*fill));
+    for(int i=0;i<32;++i){
+      const double a=double(i)*2*PI/32,b=double(i+1)*2*PI/32;
+      line(cx+int(radius*std::cos(a)),cy+int(radius*std::sin(a)),
+           cx+int(radius*std::cos(b)),cy+int(radius*std::sin(b)),{172,188,185,255});
+      line(cx+int(body*std::cos(a)),cy+int(body*std::sin(a)),
+           cx+int(body*std::cos(b)),cy+int(body*std::sin(b)),{111,92,65,255});
+    }
+    for(int i=0;i<6;++i){
+      const double a=double(i)*PI/3+double(reelAngle);
+      line(cx+int(10*std::cos(a)),cy+int(10*std::sin(a)),
+           cx+int((radius-7)*std::cos(a)),cy+int((radius-7)*std::sin(a)),{202,215,208,255});
+    }
+    box(cx-8,cy-8,16,16,{15,31,44,255},{177,215,221,255});
+    box(cx-3,cy-3,6,6,{246,190,87,255});
+  };
+  reel(213,278,48,.77f-.29f*progress);
+  reel(447,278,48,.48f+.29f*progress);
+  box(273,270,111,15,{19,24,26,255},{73,92,91,255});
+  line(263,315,397,315,{87,73,58,255});
+  box(103,338,457,12,{9,25,31,255},{75,121,133,255});
+  if(total)box(105,340,int(453*progress),8,AMBER);
+  box(65,378,532,77,{8,25,34,255},{72,134,149,255});
+  text(playingIndex<0?"CINTA PREPARADA":live?(paused?"PAUSE":"PLAY"):"STOP",89,385,21,live&&!paused?GREEN:AMBER);
+  text(fmt_time(at)+" / "+fmt_time(total),583,385,20,WHITE,2);
+  const char* labels[]={"|<<","PLAY","PAUSA","STOP",">>|"};
+  for(int i=0;i<5;++i){
+    const int x=84+i*101;
+    box(x,416,86,32,{27,49,61,255},{133,174,174,255});
+    text(labels[i],x+43,424,17,i==1&&live&&!paused?GREEN:WHITE,1);
+  }
+  box(646,103,286,371,{7,19,34,246},{80,150,175,255});
+  text("SELECCIÓN DE CINTA",789,116,21,CYAN,1);
+  for(int i=0;i<JUKE_COUNT;++i){
+    const int y=153+i*26;bool selected=i==playerIndex,active=i==playingIndex;
+    box(654,y,270,24,selected?RGBA{34,78,106,255}:RGBA{9,29,49,240},selected?AMBER:DIM);
+    text((i<9?"0":"")+std::to_string(i+1),661,y+4,16,selected?AMBER:DIM);
+    int font=15;while(font>11&&textwidth(jukeName[i],font)>211)--font;
+    text(jukeName[i],690,y+(24-font)/2,font,selected?WHITE:DIM);
+    if(active)box(916,y+8,5,8,live&&!paused?GREEN:AMBER);
+  }
+  text("NIVEL DE SEÑAL  L / R",789,420,15,CYAN,1);
+  for(int ch=0;ch<2;++ch){
+    const int yy=443+ch*13;const int bars=int(19*(ch==0?meterL:meterR));
+    for(int k=0;k<19;++k)box(697+k*11,yy,8,7,k<bars?(k>15?RED:k>11?AMBER:GREEN):RGBA{24,48,60,255});
+  }
+  text("ARRIBA/ABAJO: ELEGIR · ENTER: PLAY · IZQ/DER: CAMBIAR",480,490,17,AMBER,1);
+  text("P: PAUSA · X: STOP · ESC: TÍTULO · FUTUREDARK © 2026",480,514,16,DIM,1);
  }
  void intro(){background();terrain();box(0,0,W,H,{0,5,18,145});box(100,61,760,113,{2,13,31,224},{31,90,135});text(fase==5?"05 · EL CORAZÓN DE JÚPITER":fase==4?"04 · LA CUNA DE LAS ESTRELLAS":fase==3?"03 · LAS CRIPTAS DE EUROPA":fase==2?"02 · LA NAVE DEL SILENCIO":"01 · LA SEÑAL IMPOSIBLE",480,75,41,WHITE,1);text(fase==5?"GRAN TORMENTA · DEFENSA DEL NÚCLEO":fase==4?"OCÉANO INTERIOR · ÚTERO CÓSMICO":fase==3?"BAJO EL HIELO DE EUROPA":fase==2?"ODISEA II · LABORATORIO INFECTADO":"ÓRBITA EXTERIOR DE JÚPITER",480,132,25,CYAN,1);
   box(57,207,846,237,{3,16,34,238},{65,148,199});portrait(2,0,84,242,112,128);portrait(3,0,210,242,112,128);
@@ -1849,6 +1911,8 @@ void message(int role,const std::string&who,const std::string&msg,float duration
    if(code==27){back_to_title();return;}
    if(code==1073741905||code=='s')playerIndex=(playerIndex+1)%JUKE_COUNT;
    if(code==1073741906||code=='w')playerIndex=(playerIndex+JUKE_COUNT-1)%JUKE_COUNT;
+   if(code==1073741904){playerIndex=(playerIndex+JUKE_COUNT-1)%JUKE_COUNT;jukebox_play();}
+   if(code==1073741903){playerIndex=(playerIndex+1)%JUKE_COUNT;jukebox_play();}
    if(code==13||code==32)jukebox_play();
    if(code=='p'&&playingIndex>=0){if(auddev)SDL_LockAudioDevice(auddev);musicPaused=!musicPaused;if(auddev)SDL_UnlockAudioDevice(auddev);}
    if(code=='x')jukebox_stop();
