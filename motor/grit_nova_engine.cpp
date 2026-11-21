@@ -72,6 +72,47 @@ std::vector<uint32_t> uppercase_utf8(const std::string&s){
  }
 
 
+
+void mix_stereo_s16(uint8_t* stream,int bytes,bool enabled,bool stereo,const Sound*& track,size_t& pos,
+                    bool paused,bool loop,std::array<AudioVoice,32>& voices,
+                    int master,int music,int effects){
+  std::memset(stream,0,size_t(bytes));
+  if(!enabled)return;
+  auto* out=reinterpret_cast<int16_t*>(stream);
+  const int frames=bytes/4; // S16 intercalado: izquierda, derecha
+  const float musicGain=.37f*float(master*music)/10000.f;
+  const float fxGain=float(master*effects)/10000.f;
+  for(int i=0;i<frames;++i){
+    float left=0.f,right=0.f;
+    if(track && !track->pcm.empty() && !paused){
+      const size_t frames=track->pcm.size()/size_t(std::max(1,track->channels));
+      if(pos>=frames){if(loop)pos=0;else track=nullptr;}
+      if(track){
+        const size_t i=pos++*size_t(track->channels);
+        left+=float(track->pcm[i])*musicGain;
+        right+=float(track->pcm[i+(track->channels==2?1:0)])*musicGain;
+      }
+    }
+    for(auto &v:voices){
+      if(!v.sample)continue;
+      if(v.position>=v.sample->pcm.size()){v.sample=nullptr;continue;}
+      const float sample=float(v.sample->pcm[v.position++])*v.gain*fxGain;
+      const float pan=stereo?std::clamp(v.pan,-1.f,1.f):0.f;
+      // Centro a nivel original; atenuar exclusivamente el canal lejano.
+      left+=sample*(pan>0.f?1.f-.78f*pan:1.f);
+      right+=sample*(pan<0.f?1.f+.78f*pan:1.f);
+      if(v.position>=v.sample->pcm.size())v.sample=nullptr;
+    }
+    const auto limit=[](float v){
+      if(v>27500.f)v=27500.f+(v-27500.f)*.14f;
+      else if(v< -27500.f)v=-27500.f+(v+27500.f)*.14f;
+      return int16_t(std::clamp(v,-32768.f,32767.f));
+    };
+    out[i*2]=limit(left);
+    out[i*2+1]=limit(right);
+  }
+}
+
 void mix_mono_s16(uint8_t* stream,int bytes,bool enabled,const Sound*& track,size_t& pos,
                   bool paused,bool loop,std::array<AudioVoice,32>& voices,
                   int master,int music,int effects){

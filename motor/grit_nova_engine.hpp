@@ -52,8 +52,8 @@ constexpr int SC_A=4,SC_D=7,SC_S=22,SC_W=26;
 constexpr int SC_RIGHT=79,SC_LEFT=80,SC_DOWN=81,SC_UP=82;
 struct RGBA {int r,g,b,a=255;};
 struct Texture {SDL_Texture* t=nullptr;int w=0,h=0;};
-struct Sound {std::vector<int16_t> pcm;};
-struct AudioVoice {const Sound* sample=nullptr;size_t position=0;float gain=0.0f;int priority=0;uint32_t started=0;};
+struct Sound {std::vector<int16_t> pcm;int channels=1;};
+struct AudioVoice {const Sound* sample=nullptr;size_t position=0;float gain=0.0f;int priority=0;uint32_t started=0;float pan=0.f;};
 struct LoadedPng {SDL_Texture* texture=nullptr;int width=0,height=0;std::vector<uint8_t> pixels;std::string error;};
 LoadedPng load_png_texture(SDL_Renderer*,const std::string& filename);
 std::pair<float,float> keyboard_direction(const uint8_t* state);
@@ -63,6 +63,9 @@ void scan_controllers(SDL_GameController*& pad,int32_t& instance,uint32_t& lastS
 void mix_mono_s16(uint8_t* stream,int bytes,bool enabled,const Sound*& track,size_t& pos,
                   bool paused,bool loop,std::array<AudioVoice,32>& voices,
                   int master,int music,int effects);
+void mix_stereo_s16(uint8_t* stream,int bytes,bool enabled,bool stereo,const Sound*& track,size_t& pos,
+                    bool paused,bool loop,std::array<AudioVoice,32>& voices,
+                    int master,int music,int effects);
 void draw_box(SDL_Renderer*,int x,int y,int w,int h,RGBA fill,RGBA outline={0,0,0,0});
 void draw_line(SDL_Renderer*,int x,int y,int x2,int y2,RGBA color);
 std::vector<uint32_t> uppercase_utf8(const std::string&);

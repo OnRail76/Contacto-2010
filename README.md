@@ -1,22 +1,24 @@
-# CONTACTO 2010 · V1.1
+# CONTACTO 2010 · V1.2
 
 ![Carátula oficial de CONTACTO 2010](documentacion/CONTACTO_2010_CARATULA_OFICIAL.png)
 
 Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C. Ware** y desarrollado en **C++17 y SDL2**, sobre **GRIT NOVA ENGINE**. Música original: **FutureDark**, alias musical de Tony C. Ware. Programación y desarrollo: **GPT-6 · OpenAI**.
 
+**NOVEDADES V1.2:** banda sonora FutureDark en OGG Vorbis estéreo real a 44,1 kHz; efectos espaciales, reproductor de cassette animado, medidores L/R y scanlines configurables. Nueva carátula y nueva ilustración final con Firebird-01.
+
 ![Captura real de CONTACTO 2010](capturas/CAPTURA_FASE_1.png)
 
-**Cinco fases, combates arcade, enemigos animados, banda sonora original y la nave Firebird-01.** Esta edición V1.1 incluye su nuevo diseño industrial y el Cementerio de Escombros V2.
+**Cinco fases, combates arcade, enemigos animados, banda sonora original y la nave Firebird-01.** Esta edición V1.2 incluye su nuevo diseño industrial y el Cementerio de Escombros V2.
 
 ## Descargar y jugar
 
-[**Release V1.1 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.1)
+[**Release V1.2 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2)
 
-- [AppImage x86_64 para Linux](https://github.com/OnRail76/Contacto-2010/releases/download/v1.1/Contacto_2010_V1.1-x86_64.AppImage): un único archivo ejecutable; dar permiso con `chmod +x` y abrir.
-- [Windows x64, EXE nativo y DLL en ZIP](https://github.com/OnRail76/Contacto-2010/releases/download/v1.1/CONTACTO_2010_V1.1_WINDOWS_x64.zip): descomprimir entero y abrir `CONTACTO_2010.exe`.
+- [AppImage x86_64 para Linux](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2/Contacto_2010_V1.2-x86_64.AppImage): un único archivo ejecutable; dar permiso con `chmod +x` y abrir.
+- [Windows x64, EXE nativo y DLL en ZIP](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2/CONTACTO_2010_V1.2_WINDOWS_x64.zip): descomprimir entero y abrir `CONTACTO_2010.exe`.
 - [Linux x86_64, ZIP clásico](https://github.com/OnRail76/Contacto-2010/releases/download/v1.1/CONTACTO_2010_V1.1_LINUX_COMPLETO.zip): descomprimir y ejecutar `./JUGAR_CONTACTO_2010.sh`.
 
-Las dos distribuciones nuevas se construyen y se prueban de forma nativa en GitHub Actions. El EXE no depende de Wine ni de Python.
+Las dos distribuciones V1.2 se construyen y se prueban de forma nativa en GitHub Actions. El EXE no depende de Wine ni de Python.
 
 Movimiento: **WASD o cursores**. Disparo: **ESPACIO**. Pausa: **ESC**. Pantalla completa: **F11**. Compatible con mando SDL2 con reconexión.
 

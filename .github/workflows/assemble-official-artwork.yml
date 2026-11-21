@@ -1,0 +1,31 @@
+name: V1.2 - Incorporar ilustracion final oficial
+on:
+  push:
+    branches: [desarrollo/v1.2-estereo-crt]
+    paths: ['_asset_bridge/**']
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Reconstruir PNG y verificar SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat _asset_bridge/final_00.b64 _asset_bridge/final_01.b64 _asset_bridge/final_02.b64 | base64 --decode > assets/final_escena_firebird01_hd.png
+          test "$(git hash-object assets/final_escena_firebird01_hd.png)" = "22da7797817714e0cda3db56ef5ace321fd4873f"
+          file assets/final_escena_firebird01_hd.png
+          rm -rf _asset_bridge
+      - name: Guardar ilustracion y retirar piezas temporales
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A assets/final_escena_firebird01_hd.png _asset_bridge
+          git commit -m "Arte oficial V1.2: escena final Firebird-01 HD sin deformaciones"
+          git push origin "HEAD:${{ github.ref_name }}"
