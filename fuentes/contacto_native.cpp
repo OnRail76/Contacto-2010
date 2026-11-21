@@ -47,6 +47,7 @@ struct Prize {float x=0,y=0;int type=0;};
 struct DeathFx {int kind=0;float x=0,y=0,age=0;};
 struct CrewMessage {int role=1;std::string who,msg;float life=0,elapsed=0;};
 // Guion aprobado por Tony C. Ware · CONTACTO 2010 · cinco fases.
+// AURA-01, computadora de a bordo de Firebird-01, reemplaza solo el personaje de la científica.
 // Mantener sin cambios la ortografía original y las pausas de cada renglón.
 static const char* const TEXTO_BRIEFING[5][4]={
   { "ODISEA II HA PERDIDO CONTACTO.", "EXPLORA EL CEMENTERIO ORBITAL.", "LOCALIZA LA SEÑAL IMPOSIBLE.", "EVITA LAS DEFENSAS AUTOMÁTICAS." },
@@ -56,11 +57,11 @@ static const char* const TEXTO_BRIEFING[5][4]={
   { "JÚPITER ESTÁ FORMADO POR LOS", "ESPECTROS DEMONÍACOS DEL UNIVERSO", "ES AQUÍ DONDE RESIDE TODO MAL", "" }
 };
 static const char* const TEXTO_PREJEFE[5][2]={
-  { "CIENTÍFICA: ESO NO ERA UNA SEÑAL.", "¡ERA UNA ADVERTENCIA!." },
-  { "CIENTÍFICA: TODOS FORMAN PARTE DE LA NAVE.", "ES COMO SI TUVIERA VOLUNTAD." },
-  { "CIENTÍFICA: ESTÁ PROTEGIENDO UNA ENTRADA.", "HAY ALGO BAJO EL HIELO." },
-  { "CIENTÍFICA: AHORA SABEMOS LA VERDAD.", "EL MAL TIENE FORMA Y VIVE AQUÍ." },
-  { "CIENTÍFICA: ASI QUE ERA ESTO.", "EL PROVEEDOR DE MUERTE JOVIANO." }
+  { "AURA-01: ESO NO ERA UNA SEÑAL.", "¡ERA UNA ADVERTENCIA!." },
+  { "AURA-01: TODOS FORMAN PARTE DE LA NAVE.", "ES COMO SI TUVIERA VOLUNTAD." },
+  { "AURA-01: ESTÁ PROTEGIENDO UNA ENTRADA.", "HAY ALGO BAJO EL HIELO." },
+  { "AURA-01: AHORA SABEMOS LA VERDAD.", "EL MAL TIENE FORMA Y VIVE AQUÍ." },
+  { "AURA-01: ASI QUE ERA ESTO.", "EL PROVEEDOR DE MUERTE JOVIANO." }
 };
 static const char* const TITULO_JEFE[5]={"MOAI MONOLITH", "ODISEA II ASIMILADA", "HALCÓN ESTELAR REX", "HIJO DE LAS ESTRELLAS", "EL FANTASMA DE JÚPITER"};
 static const char* const CONSEJOS_JEFE[5][2]={
@@ -133,7 +134,7 @@ public:
  }
  bool init(){
   if(SDL_Init(0x20|0x2000|0x10)!=0){std::cerr<<"SDL_Init: "<<SDL_GetError()<<"\n";return false;}
-  win=SDL_CreateWindow("CONTACTO 2010 · V1.2 PREVIEW · Tony C. Ware",0x2FFF0000,0x2FFF0000,1280,720,0x4|0x20);
+  win=SDL_CreateWindow("CONTACTO 2010 · V1.2 · Tony C. Ware",0x2FFF0000,0x2FFF0000,1280,720,0x4|0x20);
   if(!win){std::cerr<<"SDL_Window: "<<SDL_GetError()<<"\n";return false;}
   ren=SDL_CreateRenderer(win,-1,2|4);
   if(!ren)ren=SDL_CreateRenderer(win,-1,1);
@@ -147,7 +148,7 @@ public:
      SDL_SetTextureBlendMode(scanlineTexture,1);
    }
   struct Item{const char* k;const char* f;};
-  const Item list[]={{"fondo","jupiter.png"},{"mapa","fase1_cementerio_v2_1920x540.png"},{"ship","firebird_01_16f_hd.png"},{"moai","moai_24f.png"},{"sierra","rodante_sierra_24f.png"},{"menor","enemigo_monolito_24f.png"},{"portrait","retratos_definitivos.png"},{"fx_orb","fx_bala_enemiga.png"},{"fx_pulse","fx_pulso.png"},{"fx_laser","fx_laser.png"},{"escudo_nuevo","escudo_firebird_nuevo_4f.png"},{"triangulo","alerta_estalactitas_4f.png"},{"mira","mira_debil_jefes_4f.png"},{"logo","CONTACTO_2010_LOGO_JUEGO.png"},{"marca_tony","tony_c_ware_logo.png"},{"marca_grit","grit_nova_logo_oficial.png"},{"hud","hud_militar_960x120.png"},{"glyph","fuente_legible.png"},
+  const Item list[]={{"fondo","jupiter.png"},{"mapa","fase1_cementerio_v2_1920x540.png"},{"ship","firebird_01_16f_hd.png"},{"moai","moai_24f.png"},{"sierra","rodante_sierra_24f.png"},{"menor","enemigo_monolito_24f.png"},{"portrait","retratos_definitivos.png"},{"aura","AURA_01_SHEET_RGBA.png"},{"fx_orb","fx_bala_enemiga.png"},{"fx_pulse","fx_pulso.png"},{"fx_laser","fx_laser.png"},{"escudo_nuevo","escudo_firebird_nuevo_4f.png"},{"triangulo","alerta_estalactitas_4f.png"},{"mira","mira_debil_jefes_4f.png"},{"logo","CONTACTO_2010_LOGO_JUEGO.png"},{"marca_tony","tony_c_ware_logo.png"},{"marca_grit","grit_nova_logo_oficial.png"},{"hud","hud_militar_960x120.png"},{"glyph","fuente_legible.png"},
    {"hud_white","hud_fuentes/FUENTE_BLANCO_HIELO.png"},{"hud_cyan","hud_fuentes/FUENTE_CIAN_RADAR.png"},{"hud_amber","hud_fuentes/FUENTE_AMBAR_ARMA.png"},{"hud_magenta","hud_fuentes/FUENTE_MAGENTA_ALERTA.png"},{"hud_big","hud_fuentes/FUENTE_NUMEROS_GRANDES.png"},{"hud_smile","hud_fuentes/VIDAS_SMILEYS_RGBA.png"},
    {"fondo2","fase2_fondo_hd.png"},{"mapa2","fase2_terreno.png"},
    // Sierras rodantes compartidas por las fases 1 y 2; sin walkers. 
@@ -164,6 +165,9 @@ public:
    {"cel_devora_di","fase4_celula_devoradora_di.png"},{"cel_devora_id","fase4_celula_devoradora_id.png"},
    {"hijo","fase4_hijo_estrellas.png"}};
   for(const auto&i:list)if(!load(i.k,i.f))return false;
+  if(textures["aura"].w!=2172||textures["aura"].h!=724){
+    std::cerr<<"AURA-01: atlas incorrecto; se necesita 2172x724 con 12 fotogramas\n";return false;
+  }
   std::ifstream g(base+"terreno.bin",std::ios::binary);uint32_t n=0;g.read((char*)&n,4);
   if(n<1000||n>10000){std::cerr<<"Datos de colisiones incorrectos\n";return false;}
   for(uint32_t i=0;i<n;i++){uint16_t a,b;g.read((char*)&a,2);g.read((char*)&b,2);wallTop.push_back(a);wallFloor.push_back(b);}
@@ -736,11 +740,16 @@ public:
  }
 
  std::string num(int n){std::ostringstream s;s<<std::setw(7)<<std::setfill('0')<<n;return s.str();}
- void portrait(int role,int frame,int x,int y,int w,int h){sprite("portrait",8,112,140,role*8+frame,x,y,w,h);}
+ void portrait(int role,int frame,int x,int y,int w,int h){
+   // AURA-01, computadora de Firebird-01: animacion RGBA 6x2, 12 frames.
+   if(role==3){sprite("aura",6,362,362,frame%12,x,y,w,h);return;}
+   sprite("portrait",8,112,140,role*8+frame,x,y,w,h);
+  }
  void draw_radio(){if(radio.life<=0)return;
   const int y=447;box(18,y,734,82,{5,19,38,232},{53,133,185});line(20,y+2,750,y+2,CYAN);
   int frame=(int(radio.elapsed*7)%9<6)?int(radio.elapsed*7)%4:(6+int(radio.elapsed*4)%2);
-  portrait(radio.role,frame,24,y+1,68,80);
+  const int radioFrame=(radio.role==3)?int(radio.elapsed*10.f)%12:frame;
+   portrait(radio.role,radioFrame,24,y+1,68,80);
   text(radio.who+":",114,y+9,21,CYAN);
   const std::string& m=radio.msg;auto p=m.find('|');
   const std::string first=m.substr(0,p);
@@ -817,7 +826,7 @@ public:
    const int i=id%28;
    if(i==0){message(1,"OPERADORA","ENTRAMOS EN EL CORAZON DE JUPITER.|LAS NUBES NOS MIRAN.",4.8);return;}
    if(i==9){message(0,"PILOTO","ESTOY VOLANDO EN EL INFIERNO.",4.8);return;}
-   if(i==20){message(3,"CIENTÍFICA","SEÑAL MASIVA DE PODER.|ESTAMOS CERCA DE SU ORIGEN.",4.8);return;}
+   if(i==20){message(3,"AURA-01","SEÑAL MASIVA DE PODER.|ESTAMOS CERCA DE SU ORIGEN.",4.8);return;}
    if(i==27){message(2,"COMANDANTE","HAY UNA SEÑAL FANTASMA.|CONTINUA HASTA EL FINAL.",4.8);return;}
    if(i==7||i==18){prizes.push_back({990.f,270.f,i==7?1:2});return;}
    static const int pattern[]={14,20,12,15,21,13,22,14,20,12,15,22,21,13,20,14,22,12,21,15,13,22,14,20,12,21,15,22};
@@ -843,7 +852,7 @@ public:
  void spawn_event4(int id){
    if(id==0){message(1,"OPERADORA","SEÑAL BIOLOGICA MASIVA.|TODO AQUÍ ESTÁ VIVO.",4.8);return;}
    if(id==8){message(0,"PILOTO","¡LOS INSTRUMENTOS ENLOQUECEN!|¡DEBO SALIR DE AQUÍ!",4.5);return;}
-   if(id==17){message(3,"CIENTÍFICA","ALGO ESTÁ A PUNTO DE NACER.|TODO AQUÍ LO PROTEGE.",4.6);return;}
+   if(id==17){message(3,"AURA-01","ALGO ESTÁ A PUNTO DE NACER.|TODO AQUÍ LO PROTEGE.",4.6);return;}
    if(id==24){message(2,"COMANDANTE","CONTACTO VISUAL INMINENTE.|DESTRUYE AL ENTE NEONATO.",4.8);return;}
    if(id==9||id==19){prizes.push_back({990,270,id==9?1:2});return;}
    static const int pattern[]={30,32,31,30,34,33,32,35,30,31,32,34,33,35,30,32,34,31,33,35,32,30,34,33,32,35,30,34};
@@ -894,7 +903,7 @@ public:
  void spawn_event3(int id){
    if(id==0){message(1,"OPERADORA","EUROPA: DETECTAMOS FORMAS DE VIDA.|MOVIMIENTO HOSTIL DETECTADO.",4.6);return;}
    if(id==7){message(0,"PILOTO","¡HALCONES ESTELARES!|¿NO LOS HABÍAMOS DERROTADO EN EL 88?",4.4);return;}
-   if(id==16){message(3,"CIENTÍFICA","ALGO LATE BAJO EL HIELO.|DEBES SEGUIR AVANZANDO.",4.4);return;}
+   if(id==16){message(3,"AURA-01","ALGO LATE BAJO EL HIELO.|DEBES SEGUIR AVANZANDO.",4.4);return;}
    if(id==25){message(2,"COMANDANTE","NUNCA VIMOS AL REY DE LOS HALCONES,|¡DEBES DERROTARLO PARA SEGUIR!",4.8);return;}
    if(id==8||id==19){prizes.push_back({990,260,id==8?1:2});return;}
    static const int pattern[]={20,23,21,22,20,23,21,22,20,21,23,22,20,23,21,22,23,20,21,22,23,20,22,21,23,22,20,21};
@@ -943,7 +952,7 @@ public:
   case 10:spawn(3,2);break;case 11:spawn(1,6);break;case 12:spawn(14,4);break;
   case 13:prizes.push_back({990,300,2});break;case 14:spawn(2,4);break;case 15:spawn(3,2);break;
   case 16:spawn(1,5);break;case 17:spawn(15,4);break;
-  case 18:message(3,"CIENTÍFICA","ESA SEÑAL ES IMPOSIBLE.|NO PARECE DE ORIGEN HUMANO.",5.2f);break;
+  case 18:message(3,"AURA-01","ESA SEÑAL ES IMPOSIBLE.|NO PARECE DE ORIGEN HUMANO.",5.2f);break;
   case 19:spawn(2,4);break;case 20:spawn(3,3);break;case 21:prizes.push_back({990,300,0});break;
   case 22:spawn(1,6);break;case 23:spawn(14,5);break;
   case 24:message(2,"COMANDANTE","FIREBIRD 01: LOCALIZA LA FUENTE.|PREPÁRATE PARA TOMAR CONTACTO.",5.1f);break;
@@ -967,7 +976,7 @@ void spawn_event2(int id){
     case 13:spawn_phase2(14,4);break;
     case 14:spawn_phase2(11,4);break;
     case 15:spawn_phase2(13,3);break;
-    case 16:message(3,"CIENTÍFICA","LAS VÍSCERAS HAN ASIMILADO|LOS MÓDULOS CIENTÍFICOS.",5.1);break;
+    case 16:message(3,"AURA-01","LAS VÍSCERAS HAN ASIMILADO|LOS MÓDULOS CIENTÍFICOS.",5.1);break;
     case 17:spawn_phase2(10,4);break;
     case 18:spawn_phase2(14,5);break;
     case 19:prizes.push_back({990,260,0});break;
@@ -987,7 +996,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   if(fase==1) message(4,"ENTE ALIENÍGENA","NO DEBERÍAS HABER LLEGADO AQUÍ.",4.5f);
   else if(fase==2) message(2,"COMANDANTE","LA ODISEA II AHORA ES UN ORGANISMO.|DESTRUYE SU REACTOR.",4.5f);
   else if(fase==3) message(2,"COMANDANTE","EL HALCÓN ESTELAR REX BLOQUEA EL PASO.|EVITA SU DESCARGA.",4.5f);
-  else if(fase==4) message(3,"CIENTÍFICA","EL HIJO DE LAS ESTRELLAS DESPIERTA.|SI LOGRA SALIR, ESTAMOS PERDIDOS.",4.8f);
+  else if(fase==4) message(3,"AURA-01","EL HIJO DE LAS ESTRELLAS DESPIERTA.|SI LOGRA SALIR, ESTAMOS PERDIDOS.",4.8f);
   else if(fase==5) message(4,"ENTE ALIENÍGENA","SOY LA VOZ DE TODAS LAS TORMENTAS.|NO ABANDONARÁS JÚPITER.",4.8f);
  }
  void boss_init(){mode=BOSS;stateTime=0;bossHp=fase==5?260:fase==4?195:fase==3?175:fase==2?145:95;bossMax=bossHp;bossX=1100;bossY=250;bossTime=0;bossPhase=0;bossBeamHit=0;
@@ -1824,7 +1833,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   text("¡CONTACTO INMINENTE!",480,62,44,RED,1);
   text(TITULO_JEFE[fase-1],480,129,34,WHITE,1);
   box(67,206,828,218,{9,15,35,225},{161,74,99});portrait(3,0,96,248,112,128);portrait(4,0,222,248,112,128);
-  // Diferente diálogo científico por jefe y tamaño adaptativo para evitar cortes.
+  // AURA-01 conserva las frases originales previas a cada jefe, ajustadas para legibilidad.
   for(int i=0;i<2;i++){
     const std::string frase=TEXTO_PREJEFE[fase-1][i];
     int altura=i==0?23:22;
@@ -2340,6 +2349,26 @@ void message(int role,const std::string&who,const std::string&msg,float duration
         <<" on="<<on<<" protege="<<protects<<" record_intacto="<<recordProtected
         <<" entre_fases="<<persists<<" off="<<off<<" dano_normal="<<normalDamage<<" nuevo_juego="<<resets<<"\n";
     return ok?0:15;
+  }
+  if(argc>=2 && std::string(argv[1])=="--self-test-aura"){
+    bool atlas=textures.count("aura") && textures["aura"].t
+               && textures["aura"].w==2172 && textures["aura"].h==724;
+    bool names=true;
+    for(int f=0;f<5;++f)names&=std::string(TEXTO_PREJEFE[f][0]).rfind("AURA-01:",0)==0;
+    for(int f=1;f<=5;++f){
+      start(f);
+      const int id=(f==1)?18:(f==2)?16:(f==3)?16:(f==4)?17:20;
+      if(f==1)spawn_event(id);
+      else if(f==2)spawn_event2(id);
+      else if(f==3)spawn_event3(id);
+      else if(f==4)spawn_event4(id);
+      else spawn_event5(id);
+      names&=radio.role==3 && radio.who=="AURA-01" && radio.life>0;
+    }
+    mode=PLAY;radio.elapsed=.55f;render();
+    std::cout<<"AURA-01: "<<(atlas&&names?"OK":"ERROR")
+             <<" atlas_12f="<<atlas<<" cinco_fases="<<names<<"\n";
+    return atlas&&names?0:49;
   }
   // Regenerar las capturas narrativas auténticas con la versión actual del
   // renderizador. Sólo diagnóstico CLI; ningún menú ni atajo de gameplay.
