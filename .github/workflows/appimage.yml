@@ -1,20 +1,17 @@
 name: AppImage x86_64 V1.1
 on:
-  workflow_run:
-    workflows: ["Pruebas C++17 SDL2"]
-    types: [completed]
+  push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   appimage:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - name: Dependencias Ubuntu 22.04
         run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev python3 curl
       - name: Compilar Linux
