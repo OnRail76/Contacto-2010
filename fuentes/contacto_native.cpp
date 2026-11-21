@@ -1,5 +1,5 @@
 // CONTACTO 2010 · Fases 1 a 5 — Motor Linux nativo SDL2
-// © 2026 Tony C. Ware · Versión V1.2 PREVIEW · MIT
+// © 2026 Tony C. Ware · Versión V1.2.1 · MIT
 // Sin navegador, Python, pip ni conexión a Internet.
 #include <png.h>
 #ifdef _WIN32
@@ -47,7 +47,7 @@ struct Prize {float x=0,y=0;int type=0;};
 struct DeathFx {int kind=0;float x=0,y=0,age=0;};
 struct CrewMessage {int role=1;std::string who,msg;float life=0,elapsed=0;};
 // Guion aprobado por Tony C. Ware · CONTACTO 2010 · cinco fases.
-// AURA-01, computadora de a bordo de Firebird-01, reemplaza solo el personaje de la científica.
+// AURA-01 es la computadora de a bordo de Firebird-01 (rol narrativo 3).
 // Mantener sin cambios la ortografía original y las pausas de cada renglón.
 static const char* const TEXTO_BRIEFING[5][4]={
   { "ODISEA II HA PERDIDO CONTACTO.", "EXPLORA EL CEMENTERIO ORBITAL.", "LOCALIZA LA SEÑAL IMPOSIBLE.", "EVITA LAS DEFENSAS AUTOMÁTICAS." },
