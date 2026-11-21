@@ -5,7 +5,7 @@
 **Nave:** Firebird-01 · Fuerza Espacial Europea  
 **Función:** computadora de navegación, sensores, alerta, diagnóstico y comunicaciones de misión
 
-AURA-01 reemplaza por completo al anterior personaje de la científica. Es una interfaz de inteligencia de a bordo, representada por un ojo óptico rojo que se ilumina y palpita al emitir sus mensajes. El nombre aparece en las transmisiones del HUD y en los diálogos anteriores a los jefes.
+AURA-01 es la interfaz de inteligencia de a bordo, representada por un ojo óptico rojo que se ilumina y palpita al emitir sus mensajes. El nombre aparece en las transmisiones del HUD y en los diálogos anteriores a los jefes.
 
 ## Diseño gráfico
 
@@ -17,7 +17,7 @@ AURA-01 reemplaza por completo al anterior personaje de la científica. Es una i
 
 ## Continuidad argumental
 
-**No se altera ninguna frase.** Las once menciones al nombre del personaje anterior se sustituyen por **AURA-01**, manteniendo el texto de cada mensaje, los cinco guiones pre-jefe, los tiempos, las fases, el orden de los eventos y los demás interlocutores. En el caso de expresiones como «módulos científicos», se conserva su significado original porque describen instalaciones, no a la antigua científica.
+**No se altera ninguna frase.** El nombre mostrado en las comunicaciones y en los cinco pre-jefes es **AURA-01**, manteniendo el texto de cada mensaje, los cinco guiones pre-jefe, los tiempos, las fases, el orden de los eventos y los demás interlocutores. Las menciones a instalaciones y módulos científicos se conservan íntegramente porque forman parte del guion original.
 
 El atlas de retratos de otros personajes sigue cargándose para conservar al piloto, operadora, comandante y antagonista. El rol narrativo 3 utiliza exclusivamente el nuevo atlas de AURA-01.
 
