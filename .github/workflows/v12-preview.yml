@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Dependencias nativas
-        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev python3 curl
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev libvorbis-dev python3 curl
       - name: Compilar y comprobar audio y scanlines
         env:
           SDL_VIDEODRIVER: dummy
@@ -65,6 +65,7 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-SDL2
             mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-libvorbis
             mingw-w64-ucrt-x86_64-binutils
             zip
       - name: Compilar y empaquetar version experimental
