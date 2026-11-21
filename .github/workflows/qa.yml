@@ -4,22 +4,25 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   linux-qa:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Dependencias
-        run: sudo apt-get update && sudo apt-get install -y g++ libsdl2-2.0-0 libpng-dev
-      - name: Compilar juego y núcleo GRIT NOVA
-        run: |
-          bash COMPILAR_LINUX.sh
-          bash motor/COMPILAR_MOTOR.sh
-      - name: Pruebas automáticas sin pantalla ni audio físico
+      - name: Dependencias Linux
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev
+      - name: Compilar juego y GRIT NOVA ENGINE
+        run: bash COMPILAR_LINUX.sh
+      - name: Pruebas de regresión sin monitor ni audio físico
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: |
-          for test in --self-test --self-test-fase2 --self-test-fase3 --self-test-fase4 --self-test-fase5 --self-test-controles --self-test-sierras --self-test-estalactitas --self-test-halcones --self-test-rayos --self-test-final --self-test-bso; do
+          set -euo pipefail
+          for test in             --self-test --self-test-fase2 --self-test-fase3 --self-test-fase4 --self-test-fase5             --test-combate-fase2 --test-combate-fase3 --test-combate-fase4 --test-combate-fase5             --self-test-controles --self-test-sierras --self-test-estalactitas             --self-test-halcones --self-test-rayos --self-test-final --self-test-bso             --self-test-firebird --self-test-avisos-escudo; do
+            echo "===== $test ====="
             ./CONTACTO_2010_LINUX "$test"
           done
+          bash motor/PROBAR_MOTOR.sh

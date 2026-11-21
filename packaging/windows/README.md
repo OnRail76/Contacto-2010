@@ -1,3 +1,13 @@
-# Icono de Windows
+# CONTACTO 2010 V1.1 para Windows x64
 
-El ICO de Windows contiene las resoluciones 16, 24, 32, 48, 64, 128 y 256 px. Para enlazarlo a un futuro ejecutable nativo de Windows, compilando con MinGW-w64: `windres contacto2010.rc -O coff -o contacto2010_res.o`, y vincular el archivo objeto al proyecto junto a SDL2 y libpng para Windows. **Este repositorio NO contiene ni promete un EXE de Windows**; la build de Linux no funciona como EXE sin una adaptación y verificación.
+Build nativa con MSYS2 UCRT64. Fuentes C++17 + SDL2 + libpng.
+El icono oficial ICO se incorpora al ejecutable mediante windres.
+
+El workflow `.github/workflows/windows.yml` compila en Windows,
+realiza pruebas reales en el runner Windows, incluye las DLL UCRT64,
+los recursos PNG/WAV y la banda sonora OGG, y publica un ZIP
+descargable en la Release v1.1 **solo si las pruebas han pasado**.
+
+Para compilar en MSYS2 UCRT64: `bash packaging/windows/COMPILAR_WINDOWS.sh`
+y para empaquetar: `bash packaging/windows/EMPAQUETAR_WINDOWS.sh`.
+No es Wine, un emulador, ni un ejecutable Linux renombrado.

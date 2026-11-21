@@ -1,24 +1,56 @@
-name: Construir AppImage x86_64
+name: AppImage x86_64 V1.1
 on:
+  workflow_run:
+    workflows: ["Pruebas C++17 SDL2"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   appimage:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Dependencias
-        run: sudo apt-get update && sudo apt-get install -y g++ libsdl2-2.0-0 libpng-dev python3
-      - name: Compilar
-        run: bash COMPILAR_LINUX.sh
-      - name: Preparar AppDir
-        run: python3 packaging/appimage/crear_appdir.py
-      - name: Descargar herramienta oficial y construir
-        run: |
-          curl -fL --retry 4 -o /tmp/appimagetool.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x /tmp/appimagetool.AppImage
-          APPIMAGETOOL=/tmp/appimagetool.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
-      - name: Conservar resultado descargable
-        uses: actions/upload-artifact@v4
         with:
-          name: Contacto-2010-V1.1-AppImage
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Dependencias Ubuntu 22.04
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev python3 curl
+      - name: Compilar Linux
+        run: bash COMPILAR_LINUX.sh
+      - name: Preparar AppDir compatible
+        run: python3 packaging/appimage/crear_appdir.py
+      - name: Probar AppDir antes de empaquetar
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          bash dist/appimage/VERIFICAR_APPDIR.sh
+          dist/appimage/Contacto2010.AppDir/AppRun --self-test-firebird
+      - name: Obtener appimagetool oficial y construir
+        run: |
+          curl --fail --location --retry 4 --retry-all-errors \
+            -o /tmp/appimagetool-x86_64.AppImage \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool-x86_64.AppImage
+          APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
+      - name: Probar AppImage real, no solo AppDir
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          dist/appimage/Contacto_2010_V1.1-x86_64.AppImage --self-test
+          dist/appimage/Contacto_2010_V1.1-x86_64.AppImage --self-test-firebird
+          file dist/appimage/Contacto_2010_V1.1-x86_64.AppImage
+          sha256sum dist/appimage/Contacto_2010_V1.1-x86_64.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CONTACTO_2010_V1.1_AppImage_x86_64
           path: dist/appimage/Contacto_2010_V1.1-x86_64.AppImage
+          compression-level: 0
+      - name: Anadir AppImage probado a Release v1.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload v1.1 dist/appimage/Contacto_2010_V1.1-x86_64.AppImage --clobber
