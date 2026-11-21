@@ -5,6 +5,9 @@ on:
       - 'fuentes/**'
       - 'motor/**'
       - 'packaging/**'
+      - 'assets/**'
+      - 'documentacion/**'
+      - 'README.md'
       - '.github/workflows/v12-preview.yml'
   workflow_dispatch:
 permissions:
@@ -54,7 +57,7 @@ jobs:
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x /tmp/appimagetool-x86_64.AppImage
           APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
-          mv dist/appimage/Contacto_2010_V1.1-x86_64.AppImage dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage
+          mv dist/appimage/Contacto_2010_V1.2-x86_64.AppImage dist/appimage/Contacto_2010_V1.2_PREVIEW-x86_64.AppImage
       - name: Prueba de AppImage real
         env:
           SDL_VIDEODRIVER: dummy
@@ -92,13 +95,13 @@ jobs:
         run: |
           bash packaging/windows/COMPILAR_WINDOWS.sh
           bash packaging/windows/EMPAQUETAR_WINDOWS.sh
-          sed -i 's/V1.1/V1.2 PREVIEW/g' dist/windows/CONTACTO_2010_V1.1_WINDOWS_x64/LEEME_WINDOWS.txt
+          sed -i 's/V1.1/V1.2 PREVIEW/g' dist/windows/CONTACTO_2010_V1.2_WINDOWS_x64/LEEME_WINDOWS.txt
       - name: Pruebas Windows sin monitor ni dispositivo de audio
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: |
-          cd dist/windows/CONTACTO_2010_V1.1_WINDOWS_x64
+          cd dist/windows/CONTACTO_2010_V1.2_WINDOWS_x64
           ./CONTACTO_2010.exe --self-test-estereo-crt
           ./CONTACTO_2010.exe --self-test-menu
           ./CONTACTO_2010.exe --self-test
@@ -107,7 +110,7 @@ jobs:
       - name: ZIP de preview
         run: |
           cd dist/windows
-          mv CONTACTO_2010_V1.1_WINDOWS_x64 CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64
+          mv CONTACTO_2010_V1.2_WINDOWS_x64 CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64
           zip -qr CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64.zip CONTACTO_2010_V1.2_PREVIEW_WINDOWS_x64
       - uses: actions/upload-artifact@v4
         with:

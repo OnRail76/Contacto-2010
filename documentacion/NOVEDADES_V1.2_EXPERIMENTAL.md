@@ -33,3 +33,7 @@ Estéreo espacial SÍ/NO, sonido y volúmenes, y cuatro intensidades de scanline
 - Pruebas: fases y jefes, banda sonora, estéreo panorámico, scanlines, jingles, reproducción/pausa/stop y arranque en ambas plataformas.
 
 Se recomienda una comprobación final con auriculares y partida real antes de etiquetar V1.2.
+
+## Arte oficial incorporado a V1.2
+
+Portada oficial Firebird-01 en 
