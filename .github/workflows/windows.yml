@@ -1,16 +1,5 @@
 name: Windows EXE x64 V1.1
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'fuentes/**'
-      - 'motor/**'
-      - 'assets/**'
-      - 'banda_sonora_original/**'
-      - 'packaging/**'
-      - 'COMPILAR_LINUX.sh'
-      - 'lib/**'
-      - '.github/workflows/windows.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -23,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: v1.1
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
