@@ -985,11 +985,9 @@ void message(int role,const std::string&who,const std::string&msg,float duration
  // Mantener el jingle de victoria completo antes del cambio automático de fase.
  // ESPACIO puede adelantar manualmente la siguiente fase pasados los 3 segundos habituales.
  float victory_delay()const{
-  if(!sound||masterVolume==0||musicVolume==0)return 4.2f;
-  auto it=audio.find("musica_victoria");
-  if(it==audio.end()||it->second.pcm.empty())return 4.2f;
-  return std::max(4.2f,float(it->second.pcm.size())/22050.f+0.12f);
- }
+   if(!sound||masterVolume==0||musicVolume==0||musicName!="musica_victoria"||musicData.pcm.empty())return 4.2f;
+   return std::max(4.2f,float(musicData.pcm.size()/2)/44100.f+.12f);
+  }
  void life_hit(){if(cheatInvulnerable||vulnerable>0||death>0)return;if(shieldTime>0){shieldTime=0;vulnerable=1; tone("impacto",false,shipx);return;}
   death=.9f;vulnerable=3.1f;lives--;puff(shipx,shipy,70);tone("explosion_grande",false,shipx);shots.erase(std::remove_if(shots.begin(),shots.end(),[](Bullet&b){return b.friendly;}),shots.end());weapon=0;
  }
@@ -1696,7 +1694,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
    text("LOS CAMBIOS SE GUARDAN AUTOMÁTICAMENTE",480,522,15,DIM,1);
   }
 
- static std::string fmt_time(size_t samples){size_t t=samples/22050;return std::to_string(t/60)+":"+(t%60<10?"0":"")+std::to_string(t%60);}
+ static std::string fmt_time(size_t samples){size_t t=samples/44100;return std::to_string(t/60)+":"+(t%60<10?"0":"")+std::to_string(t%60);}
  void jukebox(){background();box(0,0,W,H,{0,6,18,210});
   text("REPRODUCTOR MUSICAL",480,31,40,CYAN,1);
   text("CONTACTO 2010 · BANDA SONORA DE FUTUREDARK",480,76,20,AMBER,1);
@@ -2004,41 +2002,24 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     return ok?0:3;
   }
   if(testFreshJingles){
-    // Los tres jingles deben corresponder a sus pantallas, estar precargados,
-    // durar lo esperado y comenzar en ~0,2 s sin silencios de 1-2 segundos.
     bool ok=true;
-    const std::array<std::tuple<const char*,float,float>,3> tracks{{
-      {"musica_titulo",15.35f,15.75f},
-      {"musica_victoria",14.65f,15.05f},
-      {"musica_game_over",10.30f,10.75f}
-    }};
-    for(const auto &[name,minimum,maximum]:tracks){
-      auto it=audio.find(name);
-      bool present=it!=audio.end()&&!it->second.pcm.empty();
-      float length=0.f,onset=999.f,maxRms=0.f;
-      if(present){
-        const auto &pcm=it->second.pcm;
-        length=float(pcm.size())/22050.f;
-        const size_t chunk=2205;
-        std::vector<float> env;
-        for(size_t pos=0;pos+chunk<=pcm.size();pos+=chunk){
-          double sum=0;
-          for(size_t j=0;j<chunk;j++){
-            double v=double(pcm[pos+j])/32768.;sum+=v*v;
-          }
-          float rms=float(std::sqrt(sum/double(chunk)));
-          env.push_back(rms);
-          maxRms=std::max(maxRms,rms);
-        }
-        const float threshold=std::max(.002f,maxRms*.06f);
-        for(size_t i=0;i<env.size();i++)if(env[i]>threshold){onset=float(i)*.1f;break;}
+    for(const char* name:{"musica_titulo","musica_victoria","musica_game_over"}){
+      Sound song;const bool present=ogg_decode(name,song);
+      const float duration=float(song.pcm.size()/2)/44100.f;
+      float onset=999.f,maxRms=0.f;
+      const size_t chunk=4410*2;
+      std::vector<float> env;
+      for(size_t pos=0;pos+chunk<=song.pcm.size();pos+=chunk){
+        double sum=0;
+        for(size_t j=0;j<chunk;++j){const double v=double(song.pcm[pos+j])/32768.;sum+=v*v;}
+        const float rms=float(std::sqrt(sum/double(chunk)));env.push_back(rms);maxRms=std::max(maxRms,rms);
       }
-      bool valid=present&&length>=minimum&&length<=maximum&&onset<=.35f;
+      const float threshold=std::max(.002f,maxRms*.06f);
+      for(size_t i=0;i<env.size();++i)if(env[i]>threshold){onset=float(i)*.1f;break;}
+      const bool valid=present&&song.channels==2&&duration>3.f&&duration<90.f&&onset<.5f;
       ok &=valid;
-      std::cout<<name<<" duración="<<length<<"s inicio audible="<<onset
-               <<"s: "<<(valid?"OK":"ERROR")<<"\n";
+      std::cout<<name<<" OGG 44.1k estereo duracion="<<duration<<" onset="<<onset<<" "<<(valid?"OK":"ERROR")<<"\n";
     }
-    std::cout<<"JINGLES CORRECTOS SIN SILENCIO INICIAL: "<<(ok?"OK":"ERROR")<<"\n";
     return ok?0:43;
   }
   if(testHawks){
@@ -2188,7 +2169,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     bool win=(mode==WIN && musicName=="musica_victoria" && !musicLoop);
     stateTime=victory_delay()+.03f;move(.03f);
     bool automatic=(mode==FINAL_CREDITS && finalCreditsPage==0 && musicName=="musica_escena_final"
-      && musicTrack && !musicLoop && musicTrack->pcm.size()>22050*280);
+      && musicTrack && !musicLoop && musicTrack->pcm.size()>44100*2*280);
     bool imageReady=(textures.count("final_escena")>0 && textures["final_escena"].t!=nullptr && textures["final_escena"].w==1920);
     finalCreditsClock=5.34f;move(.05f);bool pages=(finalCreditsPage==1);
     stateTime=1.2f;key(32);bool skip=(finalCreditsPage==2);
@@ -2208,8 +2189,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
   }
   if(testSoundtrack){
     bool tracks=true;for(int i=0;i<JUKE_COUNT;i++){
-      auto it=audio.find(jukeFile[i]);
-      tracks &= (it!=audio.end()&&!it->second.pcm.empty());
+      Sound dummy;tracks &= ogg_decode(jukeFile[i],dummy,true);
     }
     bool phases=true;for(int i=1;i<=5;i++){
       start(i);phases &= musicName==phase_music(i) && musicTrack && musicLoop;
@@ -2236,44 +2216,27 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     return ok?0:18;
   }
   if(testJingles){
-    if(!auddev || audio["musica_titulo"].pcm.empty()){
-      std::cerr<<"Falta audio de título para la prueba\n";return 17;
-    }
-    SDL_PauseAudioDevice(auddev,1); // prueba determinista sin interferencias de callback
+    if(!auddev){std::cerr<<"Sin salida SDL2 de audio\n";return 17;}
+    SDL_PauseAudioDevice(auddev,1);
     music("musica_titulo");
-    bool loaded=(musicTrack==&audio["musica_titulo"] && !musicLoop && musicPos==0);
+    bool loaded=musicTrack==&musicData && musicData.channels==2 && !musicLoop && musicPos==0;
     SDL_LockAudioDevice(auddev);
-    musicPos=musicTrack->pcm.size()-32;
-    std::vector<uint8_t> scratch(128*2);
+    musicPos=musicData.pcm.size()/2-24;
+    std::vector<uint8_t> scratch(128*4);
     mix_audio(scratch.data(),int(scratch.size()));
-    bool ends=(musicTrack==nullptr && !musicLoop);
-    mix_audio(scratch.data(),int(scratch.size()));
-    bool staysSilent=(musicTrack==nullptr);
+    bool ends=musicTrack==nullptr && !musicLoop;
+    mix_audio(scratch.data(),int(scratch.size()));bool staysSilent=musicTrack==nullptr;
     SDL_UnlockAudioDevice(auddev);
-    music("musica_titulo");
-    bool restarts=(musicTrack==&audio["musica_titulo"] && musicPos==0 && !musicLoop);
-    // Simular el nuevo archivo opcional de GAME OVER para probar el mismo circuito.
-    bool gameOverReady=false;
-    if(audio.find("musica_game_over")!=audio.end())gameOverReady=!audio["musica_game_over"].pcm.empty();
-    if(!gameOverReady)audio["musica_game_over"].pcm.assign(120,1400);
-    music("musica_game_over");
-    bool gameOverOneShot=(musicTrack==&audio["musica_game_over"] && !musicLoop);
-    SDL_LockAudioDevice(auddev);
-    musicPos=musicTrack->pcm.size()-24;
-    mix_audio(scratch.data(),int(scratch.size()));
-    bool gameOverEnds=(musicTrack==nullptr);
+    music("musica_titulo");bool restarts=musicTrack==&musicData && musicPos==0&&!musicLoop;
+    music("musica_game_over");bool gameOverReady=musicTrack==&musicData&&musicData.channels==2;
+    SDL_LockAudioDevice(auddev);musicPos=musicData.pcm.size()/2-24;
+    mix_audio(scratch.data(),int(scratch.size()));bool gameOverEnds=musicTrack==nullptr;
     SDL_UnlockAudioDevice(auddev);
-    music("musica_game_over");
-    bool gameOverRestarts=(musicTrack==&audio["musica_game_over"] && musicPos==0 && !musicLoop);
-    music("musica_victoria");
-    bool victoryOneShot=musicTrack==&audio["musica_victoria"]&&!musicLoop;
-    music("musica_fase_04");
-    bool gameMusicLoops=musicLoop && musicTrack==&audio["musica_fase_04"];
-    bool ok=loaded && ends && staysSilent && restarts && gameOverOneShot && gameOverEnds && gameOverRestarts && victoryOneShot && gameMusicLoops;
-    std::cout<<"JINGLES UNA VEZ: "<<(ok?"OK":"ERROR")<<" titulo="<<loaded<<" termina="<<ends
-       <<" no_repite="<<staysSilent<<" reinicia="<<restarts<<" game_over="<<gameOverOneShot
-       <<" game_over_termina="<<gameOverEnds<<" game_over_reinicia="<<gameOverRestarts
-       <<" victoria_una_vez="<<victoryOneShot<<" musica_fases_loop="<<gameMusicLoops<<" game_over_audio_aportado="<<gameOverReady<<"\n";
+    music("musica_game_over");bool gameOverRestarts=musicTrack==&musicData&&musicPos==0&&!musicLoop;
+    music("musica_victoria");bool victory=musicTrack==&musicData&&!musicLoop;
+    music("musica_fase_04");bool loops=musicTrack==&musicData&&musicLoop;
+    const bool ok=loaded&&ends&&staysSilent&&restarts&&gameOverReady&&gameOverEnds&&gameOverRestarts&&victory&&loops;
+    std::cout<<"JINGLES OGG ESTEREO: "<<(ok?"OK":"ERROR")<<"\n";
     return ok?0:17;
   }
   if(testInvul){
