@@ -2,6 +2,7 @@
 // © 2026 Tony C. Ware · Versión V1.1 · MIT
 // Sin navegador, Python, pip ni conexión a Internet.
 #include <png.h>
+#include <vorbis/vorbisfile.h>
 #include <cstdint>
 #include <cstring>
 #include <cmath>
@@ -80,7 +81,7 @@ public:
  // La voz 0 es exclusiva del arma del jugador; otras 31 mezclan enemigos, explosiones y avisos.
  std::array<AudioVoice,32> voices{};
  uint64_t playerShotAudioRequested=0,playerShotAudioScheduled=0;
- const Sound* musicTrack=nullptr;size_t musicPos=0;bool musicLoop=true;
+ Sound musicData;const Sound* musicTrack=nullptr;size_t musicPos=0;bool musicLoop=true;
  std::string musicName="";
  std::map<std::string,uint32_t> lastSfxAt;
  std::vector<uint16_t> wallTop,wallFloor,wallTop1,wallFloor1,wallTop2,wallFloor2,wallTop3,wallFloor3,wallTop4,wallFloor4,wallTop5,wallFloor5;std::map<uint32_t,std::pair<int,int>> glyphs;
@@ -188,9 +189,9 @@ public:
   while(font>>cp>>size)glyphs[cp]={idx++,size};
   for(int i=0;i<125;i++){starsX[i]=rf(0,W);starsY[i]=rf(65,490);starsSpeed[i]=rf(0.2f,1.9f);starsSize[i]=ri(1,2);}
   scan_gamepads(); // Inicio: conecta el primer mando disponible; eventPoll gestiona hotplug.
-  // Todos los recursos son WAV PCM 22050 Hz / 16 bit / mono.
+  // Efectos WAV PCM 22050 Hz mono, musica OGG Vorbis estereo.
   // Precargar antes de poner en marcha el callback: ninguna carga de disco en tiempo real.
-  for(auto name:{"disparo","explosion","explosion_grande","item","laser","musica_titulo","musica_game_over","musica_fase_01","musica_fase_02","musica_fase_03","musica_fase_04","musica_fase_05","musica_jefes_06","musica_victoria","musica_escena_final","alarma","impacto","misil","escudo","rayo","apertura","explosion_corta"}){
+  for(auto name:{"disparo","explosion","explosion_grande","item","laser","alarma","impacto","misil","escudo","rayo","apertura","explosion_corta"}){
    std::ifstream f(base+"audio/"+std::string(name)+".wav",std::ios::binary);
    if(!f){if(std::string(name)!="musica_game_over" && std::string(name)!="musica_escena_final")std::cerr<<"Falta WAV: "<<name<<"\n";continue;}
    std::vector<uint8_t> b((std::istreambuf_iterator<char>(f)),{});
@@ -208,11 +209,15 @@ public:
     pos=data+z+(z&1);
    }
    if(!validFormat||!pcmOffset||pcmSize<2){std::cerr<<"Formato WAV no soportado: "<<name<<"\n";continue;}
-   auto &samples=audio[name].pcm;samples.resize(pcmSize/2);
-   for(size_t i=0;i<samples.size();++i)
-      samples[i]=int16_t(uint16_t(b[pcmOffset+i*2])|(uint16_t(b[pcmOffset+i*2+1])<<8));
+   auto &samples=audio[name].pcm;
+    const size_t n=pcmSize/2;samples.resize(n*2);
+    for(size_t i=0;i<n;++i){
+      const int16_t a=int16_t(uint16_t(b[pcmOffset+i*2])|(uint16_t(b[pcmOffset+i*2+1])<<8));
+      const int16_t next=i+1<n?int16_t(uint16_t(b[pcmOffset+(i+1)*2])|(uint16_t(b[pcmOffset+(i+1)*2+1])<<8)):a;
+      samples[i*2]=a;samples[i*2+1]=int16_t((int(a)+int(next))/2);
+    }
   }
-  SDL_AudioSpec spec{};spec.freq=22050;spec.format=AUDIO_S16LSB;spec.channels=2;spec.samples=1024;
+  SDL_AudioSpec spec{};spec.freq=44100;spec.format=AUDIO_S16LSB;spec.channels=2;spec.samples=1024;
   spec.callback=&Game::audio_callback;spec.userdata=this;
   SDL_AudioSpec obtained{};
   auddev=SDL_OpenAudioDevice(nullptr,0,&spec,&obtained,0);
@@ -223,7 +228,7 @@ public:
              <<" formato="<<obtained.freq<<" Hz/estereo/16-bit"
              <<" bufer="<<obtained.samples<<" muestras\n";
   }
-  if(auddev&&(obtained.freq!=22050||obtained.format!=AUDIO_S16LSB||obtained.channels!=2)){
+  if(auddev&&(obtained.freq!=44100||obtained.format!=AUDIO_S16LSB||obtained.channels!=2)){
     std::cerr<<"Formato de dispositivo audio incompatible\n";SDL_CloseAudioDevice(auddev);auddev=0;
   }
   load_audio_settings();load_best();music("musica_titulo");if(auddev)SDL_PauseAudioDevice(auddev,0);return true;
@@ -338,15 +343,82 @@ public:
    SDL_UnlockAudioDevice(auddev);
    if(slot>=0)lastSfxAt[name]=now;
  }
+ static const char* ogg_path(const std::string& name){
+  static const std::map<std::string,const char*> paths={
+   {"musica_fase_01","01 - Señal Imposible.ogg"},
+   {"musica_fase_02","02 - La Nave del Silencio.ogg"},
+   {"musica_fase_03","03 - Las Criptas de Europa.ogg"},
+   {"musica_fase_04","04 - La Cuna de las Estrellas.ogg"},
+   {"musica_fase_05","05 - El Corazón de Júpiter.ogg"},
+   {"musica_jefes_06","06 - Jefes Finales.ogg"},
+   {"musica_titulo","Contacto 2010 Title.ogg"},
+   {"musica_game_over","Contacto 2010 Game Over.ogg"},
+   {"musica_victoria","Contacto 2010 - Victoria.ogg"},
+   {"musica_escena_final","10 - Remember Love.ogg"}};
+  const auto it=paths.find(name);return it==paths.end()?nullptr:it->second;
+ }
+ bool ogg_decode(const std::string& name,Sound& dest,bool metadataOnly=false){
+  const char* rel=ogg_path(name);if(!rel)return false;
+  const std::string filename="banda_sonora_original/"+std::string(rel);
+  OggVorbis_File vf{};
+  if(ov_fopen(filename.c_str(),&vf)!=0){
+   std::cerr<<"OGG no disponible: "<<filename<<"\n";return false;
+  }
+  const vorbis_info* info=ov_info(&vf,-1);
+  if(!info||info->channels!=2||info->rate<22050||info->rate>96000){
+   std::cerr<<"OGG no estereo o incompatible: "<<filename<<"\n";
+   ov_clear(&vf);return false;
+  }
+  if(metadataOnly){ov_clear(&vf);return true;}
+  const int rate=info->rate;
+  const ogg_int64_t totalFrames=ov_pcm_total(&vf,-1);
+  if(totalFrames<=0||totalFrames>ogg_int64_t(rate)*1200){
+   std::cerr<<"Longitud OGG no valida: "<<filename<<"\n";
+   ov_clear(&vf);return false;
+  }
+  std::vector<int16_t> decoded;
+  decoded.reserve(size_t(totalFrames)*2);
+  char buffer[16384];int bitstream=0;long bytes=0;
+  bool valid=true;
+  while((bytes=ov_read(&vf,buffer,sizeof(buffer),0,2,1,&bitstream))!=0){
+   if(bytes<0){valid=false;break;}
+   const size_t count=size_t(bytes)/2;
+   const size_t at=decoded.size();decoded.resize(at+count);
+   std::memcpy(decoded.data()+at,buffer,count*sizeof(int16_t));
+  }
+  ov_clear(&vf);
+  if(!valid||decoded.size()<2)return false;
+  if(rate==44100)dest.pcm=std::move(decoded);
+  else{
+   const size_t inFrames=decoded.size()/2;
+   const size_t outFrames=size_t(double(inFrames)*44100.0/double(rate));
+   dest.pcm.resize(outFrames*2);
+   for(size_t i=0;i<outFrames;++i){
+    const double src=double(i)*double(rate)/44100.0;
+    const size_t at=std::min(size_t(src),inFrames-1),next=std::min(at+1,inFrames-1);
+    const float t=float(src-double(at));
+    for(int ch=0;ch<2;++ch)
+     dest.pcm[2*i+size_t(ch)]=int16_t(std::clamp(
+      float(decoded[2*at+ch])*(1.f-t)+float(decoded[2*next+ch])*t,-32768.f,32767.f));
+   }
+  }
+  dest.channels=2;
+  return !dest.pcm.empty();
+ }
  void music(const std::string& name){
-   // Toda entrada en una pantalla reinicia la pieza, incluso si se acaba de usar el mismo nombre.
-   auto it=audio.find(name);
+  // Decodificar solo una pista. Nunca hacer E/S en callback de audio.
+  if(name!=musicName||musicData.pcm.empty()){
+   Sound next;
+   if(!ogg_decode(name,next)){std::cerr<<"Falta FutureDark OGG: "<<name<<"\n";return;}
    if(auddev)SDL_LockAudioDevice(auddev);
-   musicName=name;
-   musicTrack=(it!=audio.end()&&!it->second.pcm.empty())?&it->second:nullptr;
-   musicLoop=(name!="musica_titulo" && name!="musica_game_over" && name!="musica_victoria" && name!="musica_escena_final");
-   musicPaused=false;musicPos=0;
+   musicTrack=nullptr;musicData=std::move(next);
    if(auddev)SDL_UnlockAudioDevice(auddev);
+  }
+  if(auddev)SDL_LockAudioDevice(auddev);
+  musicName=name;musicTrack=musicData.pcm.empty()?nullptr:&musicData;
+  musicLoop=(name!="musica_titulo" && name!="musica_game_over" && name!="musica_victoria" && name!="musica_escena_final");
+  musicPaused=false;musicPos=0;
+  if(auddev)SDL_UnlockAudioDevice(auddev);
  }
  void set_audio_enabled(bool enabled){
    if(auddev)SDL_LockAudioDevice(auddev);
