@@ -30,6 +30,23 @@ jobs:
           ./CONTACTO_2010_LINUX --self-test-bso
           ./CONTACTO_2010_LINUX --self-test-jingles
           ./CONTACTO_2010_LINUX --self-test-jingles-nuevos
+      - name: Capturas reales de cassette y opciones desde SDL2
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -euo pipefail
+          ./CONTACTO_2010_LINUX --capture-jukebox
+          ./CONTACTO_2010_LINUX --capture-options
+          test -s CAPTURA_REPRODUCTOR_MUSICAL.png
+          test -s CAPTURA_OPCIONES_AUDIO.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2-PREVIEW-Capturas-Reales
+          path: |
+            CAPTURA_REPRODUCTOR_MUSICAL.png
+            CAPTURA_OPCIONES_AUDIO.png
+          if-no-files-found: error
       - name: Crear AppImage experimental sin publicar
         run: |
           set -euo pipefail
