@@ -12,4 +12,4 @@ else
 fi
 g++ -std=c++17 -O2 -pipe fuentes/contacto_native.cpp motor/libgritnova.a \
   -o CONTACTO_2010_LINUX "${SDL_FLAGS[@]}" -lpng -lvorbisfile -pthread
-printf 'CONTACTO 2010 V1.2: compilacion SDL2 del sistema correcta.\n'
+printf 'CONTACTO 2010 V1.2.1: compilacion SDL2 del sistema correcta.\n'
