@@ -3,7 +3,7 @@
 Compilación nativa con MSYS2 UCRT64, C++17, SDL2, libpng y libvorbisfile.
 El icono oficial ICO se incorpora al EXE mediante windres.
 
-El workflow `.github/workflows/v12-preview.yml` comprueba el ejecutable Windows en GitHub Actions y permite descargar un paquete de verificación sin alterar la Release oficial.
+El workflow `.github/workflows/verificacion-linux-windows.yml` comprueba el ejecutable Windows en GitHub Actions y permite descargar un paquete de verificación sin alterar la Release oficial.
 
 Para compilar en MSYS2 UCRT64: `bash packaging/windows/COMPILAR_WINDOWS.sh`.
 Para empaquetar, con las DLL nativas y las diez pistas OGG estéreo:
