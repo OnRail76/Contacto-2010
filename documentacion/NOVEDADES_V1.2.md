@@ -1,6 +1,6 @@
 # CONTACTO 2010 — V1.2 oficial: FutureDark OGG, cassette y arte Firebird-01
 
-> Versión vigente: [Release V1.2](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2). Se conserva V1.1 como referencia histórica.
+> Versión vigente: [Release V1.2.1](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1), con AURA-01 y atlas oficial sin spoilers.
 
 ## Música en estéreo auténtico
 
@@ -8,7 +8,7 @@
 - Mezcla SDL2 PCM de **44.100 Hz / 16 bits / 2 canales**.
 - Decodificación con libvorbisfile; **solo se conserva en RAM la pista activa**. Si una fuente OGG viene a otra frecuencia admitida, se remuestrea al cambiar de canción, nunca dentro del callback.
 - Los efectos WAV mono de 22.050 Hz se convierten al arrancar a 44.100 Hz y mantienen su panorámica espacial.
-- Los paquetes oficiales V1.2 incluyen archivos OGG comprimidos y excluyen los antiguos WAV de música del paquete para reducir tamaño. Los WAV originales del repositorio quedan intactos por seguridad.
+- Las diez pistas OGG estéreo son la única fuente musical activa. Se retiraron del árbol de desarrollo los WAV de música duplicados, innecesarios para el juego actual. Las Releases anteriores permanecen como respaldo.
 - Las grabaciones OGG deben contener dos canales; el motor informa de cualquier archivo incorrecto. La salida espacial de los efectos sigue siendo opcional desde OPCIONES.
 
 ## Reproductor de cassette animado
@@ -29,12 +29,12 @@ Estéreo espacial SÍ/NO, sonido y volúmenes, y cuatro intensidades de scanline
 
 - Linux x86_64: compilación nativa y AppImage con dependencias libvorbisfile, libvorbis y libogg incluidas.
 - Windows x64: EXE compilado con MSYS2 UCRT64 y DLL nativas en el ZIP.
-- La Release oficial V1.2 incorpora el AppImage Linux y el EXE Windows probados, con música OGG, ilustraciones y checksums. Los workflows de prueba permanecen disponibles para validar nuevas modificaciones.
+- La Release oficial V1.2.1 incorpora el AppImage Linux y el EXE Windows probados, con música OGG, AURA-01, ilustraciones y checksums. Los workflows de prueba permanecen disponibles para validar nuevas modificaciones.
 - Pruebas: fases y jefes, banda sonora, estéreo panorámico, scanlines, jingles, reproducción/pausa/stop y arranque en ambas plataformas.
 
 Las pruebas automáticas de Linux y Windows han finalizado correctamente antes de la publicación. Se recomienda comprobar sonido, rendimiento e imagen en un equipo físico.
 
-## Arte oficial incorporado a V1.2
+## Arte oficial incorporado a V1.2.1
 
 - Carátula Firebird-01: `documentacion/CONTACTO_2010_CARATULA_OFICIAL.png`, visible como primera imagen del README y en la cabecera de la Release.
 - Ilustración final Firebird-01: `assets/final_escena_firebird01_hd.png`, integrada en la escena final del juego.
