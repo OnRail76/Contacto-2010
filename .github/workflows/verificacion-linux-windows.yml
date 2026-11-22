@@ -1,0 +1,121 @@
+name: CONTACTO 2010 V1.2.1 - Compilacion y verificacion Linux/Windows
+on:
+  pull_request:
+    paths:
+      - 'fuentes/**'
+      - 'motor/**'
+      - 'packaging/**'
+      - 'assets/**'
+      - 'documentacion/**'
+      - 'README.md'
+      - '.github/workflows/verificacion-linux-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias nativas
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev libvorbis-dev python3 curl
+      - name: Compilar y comprobar audio y scanlines
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -euo pipefail
+          bash COMPILAR_LINUX.sh
+          ./CONTACTO_2010_LINUX --self-test-estereo-crt
+          ./CONTACTO_2010_LINUX --self-test-menu
+          ./CONTACTO_2010_LINUX --self-test
+          ./CONTACTO_2010_LINUX --self-test-bso
+          ./CONTACTO_2010_LINUX --self-test-jingles
+          ./CONTACTO_2010_LINUX --self-test-jingles-nuevos
+          ./CONTACTO_2010_LINUX --self-test-aura
+      - name: Capturas reales de cassette y opciones desde SDL2
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -euo pipefail
+          ./CONTACTO_2010_LINUX --capture-jukebox
+          ./CONTACTO_2010_LINUX --capture-options
+          test -s CAPTURA_REPRODUCTOR_MUSICAL.png
+          test -s CAPTURA_OPCIONES_AUDIO.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2.1-QA-Capturas-Reales
+          path: |
+            CAPTURA_REPRODUCTOR_MUSICAL.png
+            CAPTURA_OPCIONES_AUDIO.png
+          if-no-files-found: error
+      - name: Crear AppImage de verificación sin publicar
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-all-errors -o /tmp/appimagetool-x86_64.AppImage \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool-x86_64.AppImage
+          APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
+          mv dist/appimage/Contacto_2010_V1.2.1-x86_64.AppImage dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage
+      - name: Prueba de AppImage real
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage --self-test-estereo-crt
+          dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage --self-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2.1-CHECK-Linux-x86_64
+          path: dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage
+          compression-level: 0
+          if-no-files-found: error
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-libvorbis
+            mingw-w64-ucrt-x86_64-binutils
+            zip
+      - name: Compilar y empaquetar versión de verificación
+        run: |
+          bash packaging/windows/COMPILAR_WINDOWS.sh
+          bash packaging/windows/EMPAQUETAR_WINDOWS.sh
+                - name: Pruebas Windows sin monitor ni dispositivo de audio
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          cd dist/windows/CONTACTO_2010_V1.2.1_WINDOWS_x64
+          ./CONTACTO_2010.exe --self-test-estereo-crt
+          ./CONTACTO_2010.exe --self-test-menu
+          ./CONTACTO_2010.exe --self-test
+          ./CONTACTO_2010.exe --self-test-bso
+          ./CONTACTO_2010.exe --self-test-jingles
+          ./CONTACTO_2010.exe --self-test-aura
+      - name: ZIP de preview
+        run: |
+          cd dist/windows
+          mv CONTACTO_2010_V1.2.1_WINDOWS_x64 CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64
+          zip -qr CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64.zip CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Contacto-2010-V1.2.1-CHECK-Windows-x64
+          path: dist/windows/CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64.zip
+          compression-level: 0
+          if-no-files-found: error
