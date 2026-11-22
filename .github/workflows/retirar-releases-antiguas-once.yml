@@ -1,0 +1,52 @@
+name: CONTACTO 2010 - Retirada unica de Releases historicas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/retirar-releases-antiguas-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  consolidar-y-retirar:
+    if: github.repository == 'OnRail76/Contacto-2010' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar historico y version vigente
+        run: |
+          set -euo pipefail
+          test -s HISTORIAL_VERSIONES.md
+          gh release view v1.2.1 --json tagName -q .tagName | grep -Fx v1.2.1
+          gh release view v1.2 --json tagName -q .tagName | grep -Fx v1.2
+          gh release view v1.1 --json tagName -q .tagName | grep -Fx v1.1
+      - name: Conservar las dos obras maestras 4K de V1.2 en V1.2.1
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/contacto_2010_maestros
+          gh release download v1.2 --pattern 'CONTACTO_2010_CARATULA_OFICIAL_4K.png' --pattern 'CONTACTO_2010_ESCENA_FINAL_OFICIAL_4K.png' --dir /tmp/contacto_2010_maestros
+          test -s /tmp/contacto_2010_maestros/CONTACTO_2010_CARATULA_OFICIAL_4K.png
+          test -s /tmp/contacto_2010_maestros/CONTACTO_2010_ESCENA_FINAL_OFICIAL_4K.png
+          gh release upload v1.2.1 /tmp/contacto_2010_maestros/CONTACTO_2010_CARATULA_OFICIAL_4K.png /tmp/contacto_2010_maestros/CONTACTO_2010_ESCENA_FINAL_OFICIAL_4K.png --clobber
+          gh release view v1.2.1 --json assets --jq '.assets[].name' > /tmp/contacto_2010_assets.txt
+          grep -Fx CONTACTO_2010_CARATULA_OFICIAL_4K.png /tmp/contacto_2010_assets.txt
+          grep -Fx CONTACTO_2010_ESCENA_FINAL_OFICIAL_4K.png /tmp/contacto_2010_assets.txt
+          grep -Fx Contacto_2010_V1.2.1-x86_64.AppImage /tmp/contacto_2010_assets.txt
+          grep -Fx CONTACTO_2010_V1.2.1_WINDOWS_x64.zip /tmp/contacto_2010_assets.txt
+          grep -Fx CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf /tmp/contacto_2010_assets.txt
+      - name: Eliminar solo Releases anteriores sin borrar etiquetas ni historia Git
+        run: |
+          set -euo pipefail
+          gh release delete v1.1 --yes
+          gh release delete v1.2 --yes
+          echo 'Releases actuales:'
+          gh release list --limit 30
+          tags="$(gh release list --limit 30 --json tagName --jq '.[].tagName')"
+          test "$tags" = 'v1.2.1'
+          echo 'OK: una sola Release publica, V1.2.1.'
