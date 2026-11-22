@@ -1,4 +1,4 @@
-# CONTACTO 2010 V1.2.1 — Windows x64
+# CONTACTO 2010 V1.3 — Windows x64
 
 Compilación nativa con MSYS2 UCRT64, C++17, SDL2, libpng y libvorbisfile.
 El icono oficial ICO se incorpora al EXE mediante windres.
@@ -12,4 +12,4 @@ Para empaquetar, con las DLL nativas y las diez pistas OGG estéreo:
 Los WAV de efectos se conservan. Los antiguos WAV de música ya no se distribuyen.
 El ejecutable Windows es nativo; no necesita Wine ni Python.
 
-Versión vigente: https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1
+Versión vigente: https://github.com/OnRail76/Contacto-2010/releases/tag/v1.3

@@ -81,3 +81,8 @@ Las entradas siguientes registran el contenido histórico y no son enlaces de de
 - **#5** — Limpieza de WAV, documentación y workflows antiguos, empaquetado actual y conservación del código.
 
 Las Pull Requests fusionadas y los commits siguen disponibles en GitHub como registro técnico detallado. Este archivo es la **referencia editorial única** de la evolución de CONTACTO 2010.
+
+
+## V1.3 — Nueva identidad visual oficial (22/11/2026)
+
+Nueva caratula maestra 4096 × 6144 PNG: Firebird-01 de dos alas, logotipo oficial y colores industriales. Portada renovada en README, distribuciones Linux/Windows e iconos; titulo del juego con logotipo oficial. Atlas y manual ampliados a 45 paginas sin spoilers; portada de V1.2.1 conservada como variante artistica. No se modifican las cinco fases, el piloto con visor fijo, AURA-01, los OGG FutureDark, los efectos espaciales ni la escena final ya corregida. Nueva Release V1.3 con compilaciones nativas verificadas.

@@ -1,49 +1,46 @@
-# CONTACTO 2010 · V1.2.1
+# CONTACTO 2010 · V1.3
 
-![Carátula oficial de CONTACTO 2010](documentacion/CONTACTO_2010_CARATULA_OFICIAL.png)
+![NUEVA CARÁTULA OFICIAL V1.3 DE CONTACTO 2010](documentacion/CONTACTO_2010_CARATULA_OFICIAL.png)
 
-Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C. Ware** y desarrollado en **C++17 y SDL2**, sobre **GRIT NOVA ENGINE**. Música original: **FutureDark**. Programación y desarrollo: **GPT-6 · OpenAI**.
+**Tony C. Ware · GRIT NOVA ENGINE · Música original de FutureDark.** Juego arcade horizontal de ciencia ficción para Linux x86_64/Bazzite y Windows x64, desarrollado en C++17 y SDL2. Programación y desarrollo: GPT-6 · OpenAI.
 
-**AURA-01**, computadora de a bordo de la Firebird-01, es la voz de los sistemas de la nave. Mantiene íntegramente los diálogos, avisos y apariciones establecidos, ahora con un ojo rojo animado de 12 fotogramas. [Ficha de AURA-01](documentacion/AURA-01_COMPUTADORA_FIREBIRD.md).
+## NUEVA EDICIÓN OFICIAL V1.3
 
-**NOVEDADES V1.2.1:** banda sonora FutureDark en OGG Vorbis estéreo real a 44,1 kHz; efectos espaciales, reproductor de cassette animado, medidores L/R y scanlines configurables. Nueva carátula y nueva ilustración final con Firebird-01.
+La **portada oficial V1.3** representa a la **Firebird-01 de dos alas**, con los colores industriales aprobados, el traje del piloto con visor y el logotipo oficial CONTACTO 2010. Su original es un PNG **4096 × 6144**. La portada anterior se conserva únicamente como variante artística histórica.
 
-[Historial único de versiones y evolución del motor](HISTORIAL_VERSIONES.md).
-
-![Captura real de CONTACTO 2010](capturas/CAPTURA_FASE_1.png)
-
-**Cinco fases, combates arcade, enemigos animados, banda sonora original y la nave Firebird-01.** Esta edición V1.2.1 incluye su nuevo diseño industrial y el Cementerio de Escombros V2.
+Se han renovado la carátula del repositorio, los iconos Linux/Windows, el logotipo del juego y el **atlas oficial V1.3 (45 páginas)**, con primera página renovada, lámina industrial a página completa y un nuevo anexo de carátulas. Se mantienen todas las capturas reales y no se revela el desenlace.
 
 ## Descargar y jugar
 
-[**Release V1.2.1 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1)
+[**Release oficial V1.3 — todas las descargas**](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.3)
 
-- [AppImage x86_64 para Linux](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2.1/Contacto_2010_V1.2.1-x86_64.AppImage): un único archivo ejecutable; dar permiso con `chmod +x` y abrir.
-- [Windows x64, EXE nativo y DLL en ZIP](https://github.com/OnRail76/Contacto-2010/releases/download/v1.2.1/CONTACTO_2010_V1.2.1_WINDOWS_x64.zip): descomprimir entero y abrir `CONTACTO_2010.exe`.
+- [**Linux x86_64 / Bazzite — AppImage**](https://github.com/OnRail76/Contacto-2010/releases/download/v1.3/Contacto_2010_V1.3-x86_64.AppImage). Dar permiso de ejecución con `chmod +x` y abrir.
+- [**Windows 64 bits — ejecutable nativo en ZIP**](https://github.com/OnRail76/Contacto-2010/releases/download/v1.3/CONTACTO_2010_V1.3_WINDOWS_x64.zip). Descomprimir todo y abrir `CONTACTO_2010.exe`.
+- [**Atlas oficial V1.3 (45 páginas, sin spoilers)**](documentacion/CONTACTO_2010_V1.3_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf).
+- [**Carátula oficial original 4096 × 6144 PNG**](documentacion/CONTACTO_2010_CARATULA_OFICIAL_4K.png).
 
-Las dos distribuciones V1.2.1 se construyen y se prueban de forma nativa en GitHub Actions. El EXE no depende de Wine ni de Python.
+![Captura real del videojuego](capturas/CAPTURA_FASE_1.png)
 
-Movimiento: **WASD o cursores**. Disparo: **ESPACIO**. Pausa: **ESC**. Pantalla completa: **F11**. Compatible con mando SDL2 con reconexión.
+## El juego
 
-Para compilar desde las fuentes: `bash COMPILAR_LINUX.sh` en Linux, o MSYS2 UCRT64 y `bash packaging/windows/COMPILAR_WINDOWS.sh` en Windows.
+**Cinco fases completas**, combates arcade y jefes propios, Firebird-01, Cementerio de Escombros V2, HUD militar y escudo. Se conserva la **escena final corregida en los colores oficiales**. El piloto de la Firebird-01 utiliza su retrato **fijo con visor opaco**, mientras que **AURA-01** mantiene sus 12 fotogramas y diálogos originales.
 
-## Ilustraciones oficiales
+Banda sonora FutureDark de diez pistas OGG estéreo a 44,1 kHz, efectos con panorámica espacial, reproductor de cassette animado, medidores L/R y scanlines CRT configurables.
 
-La portada Firebird-01 se muestra al principio de este README. La escena final oficial está integrada en `assets/final_escena_firebird01_hd.png` y se presenta dentro del juego. Los PNG originales 4K se conservan en la [Release vigente V1.2.1](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1).
+**Controles:** WASD o cursores para mover, ESPACIO para disparar, ESC pausa, F11 pantalla completa. Compatible con mando SDL2 y reconexión.
 
-## Documentación
+## Proyecto y documentación
 
-- [Atlas oficial V1.2.1 sin spoilers (44 páginas)](documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
-- [Historial consolidado V1.1–V1.2.1](HISTORIAL_VERSIONES.md)
+- [Atlas, memoria y manual V1.3](documentacion/CONTACTO_2010_V1.3_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
+- [Historial consolidado de versiones](HISTORIAL_VERSIONES.md)
+- [Ficha de la computadora AURA-01](documentacion/AURA-01_COMPUTADORA_FIREBIRD.md)
+- `fuentes/`: lógica del juego en C++17/SDL2.
+- `motor/`: núcleo reutilizable de GRIT NOVA ENGINE.
+- `assets/`: sprites y recursos de juego, incluida la escena final oficial y el retrato con visor.
+- `banda_sonora_original/`: música OGG estéreo original.
+- `packaging/`: iconos y compilación de distribuciones Linux/Windows.
+- `documentacion/PORTADA_OFICIAL_ANTERIOR_V1.2.1.png`: carátula anterior, archivada como variante y no oficial vigente.
 
-## Código y recursos
+Compilar Linux: `bash COMPILAR_LINUX.sh`. Compilar Windows: MSYS2 UCRT64 y `bash packaging/windows/COMPILAR_WINDOWS.sh`.
 
-- `motor/`: servicios reutilizables de GRIT NOVA ENGINE (compilación separada).
-- `fuentes/`: código del juego (fases, físicas, eventos, HUD y combates).
-- `assets/`: recursos activos: sprites RGBA, geometría BIN, efectos WAV y escena final oficial (sin WAV musicales duplicados).
-- `banda_sonora_original/`: diez pistas OGG estéreo originales utilizadas directamente por el motor.
-- `packaging/`: iconos oficiales y utilidades para Linux/AppImage y Windows.
-
-Prueba automática de arranque: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./CONTACTO_2010_LINUX --self-test`.
-
-**Licencias:** código MIT (`LICENSE`); ilustraciones y audio conservan sus derechos originales (`LICENCIA_RECURSOS.md`).
+El código se distribuye bajo **MIT** (`LICENSE`). Arte, marcas y banda sonora conservan sus condiciones específicas descritas en `LICENCIA_RECURSOS.md`.

@@ -1,0 +1,135 @@
+name: CONTACTO 2010 V1.3 - Release oficial Linux y Windows
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: contacto-2010-release-v13
+  cancel-in-progress: false
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar librerias nativas
+        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libsdl2-dev libpng-dev libvorbis-dev python3 curl
+      - name: Compilar y comprobar el motor y las comunicaciones
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -euo pipefail
+          test -s documentacion/CONTACTO_2010_CARATULA_OFICIAL_4K.png
+          test -s documentacion/CONTACTO_2010_V1.3_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf
+          test -s assets/PILOTO_FIREBIRD_01_RETRATO_RGBA.png
+          bash COMPILAR_LINUX.sh
+          for t in --self-test --self-test-bso --self-test-aura --self-test-piloto-visor --self-test-final --self-test-estereo-crt --self-test-menu --self-test-fase5; do ./CONTACTO_2010_LINUX "$t"; done
+      - name: Crear AppImage V1.3
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-all-errors -o /tmp/appimagetool-x86_64.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool-x86_64.AppImage
+          APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
+          test -s dist/appimage/Contacto_2010_V1.3-x86_64.AppImage
+      - name: Probar AppImage real
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          set -euo pipefail
+          dist/appimage/Contacto_2010_V1.3-x86_64.AppImage --self-test
+          dist/appimage/Contacto_2010_V1.3-x86_64.AppImage --self-test-piloto-visor
+          dist/appimage/Contacto_2010_V1.3-x86_64.AppImage --self-test-aura
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CONTACTO_2010_V1.3_LINUX
+          path: dist/appimage/Contacto_2010_V1.3-x86_64.AppImage
+          compression-level: 0
+          if-no-files-found: error
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-libvorbis
+            mingw-w64-ucrt-x86_64-binutils
+            zip
+      - name: Compilar Windows y generar paquete completo
+        run: |
+          set -euo pipefail
+          bash packaging/windows/COMPILAR_WINDOWS.sh
+          bash packaging/windows/EMPAQUETAR_WINDOWS.sh
+          cd dist/windows/CONTACTO_2010_V1.3_WINDOWS_x64
+          export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy
+          ./CONTACTO_2010.exe --self-test
+          ./CONTACTO_2010.exe --self-test-aura
+          ./CONTACTO_2010.exe --self-test-piloto-visor
+          ./CONTACTO_2010.exe --self-test-final
+          test -s assets/PILOTO_FIREBIRD_01_RETRATO_RGBA.png
+      - name: Comprimir Windows x64
+        run: |
+          set -euo pipefail
+          cd dist/windows
+          zip -qr CONTACTO_2010_V1.3_WINDOWS_x64.zip CONTACTO_2010_V1.3_WINDOWS_x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CONTACTO_2010_V1.3_WINDOWS
+          path: dist/windows/CONTACTO_2010_V1.3_WINDOWS_x64.zip
+          compression-level: 0
+          if-no-files-found: error
+  release:
+    needs: [linux, windows]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: CONTACTO_2010_V1.3_LINUX
+          path: release
+      - uses: actions/download-artifact@v4
+        with:
+          name: CONTACTO_2010_V1.3_WINDOWS
+          path: release
+      - name: Verificar recursos de la nueva Release
+        run: |
+          set -euo pipefail
+          cp documentacion/CONTACTO_2010_CARATULA_OFICIAL_4K.png release/
+          cp documentacion/CONTACTO_2010_V1.3_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf release/
+          cp assets/PILOTO_FIREBIRD_01_RETRATO_RGBA.png release/
+          cp documentacion/CONTACTO_2010_LOGO_OFICIAL_REFERENCIA.png release/
+          cp documentacion/PORTADA_OFICIAL_ANTERIOR_V1.2.1.png release/
+          test -s release/Contacto_2010_V1.3-x86_64.AppImage
+          test -s release/CONTACTO_2010_V1.3_WINDOWS_x64.zip
+          cd release
+          sha256sum * > SHA256_CONTACTO_2010_V1.3.txt
+      - name: Publicar V1.3 solo si Linux y Windows han superado las pruebas
+        run: |
+          set -euo pipefail
+          if gh release view v1.3 >/dev/null 2>&1; then
+            gh release upload v1.3 release/* --clobber
+            gh release edit v1.3 --notes-file documentacion/NOTAS_RELEASE_V1.3.md --title 'CONTACTO 2010 V1.3 - Edicion oficial'
+          else
+            gh release create v1.3 release/* --target main --title 'CONTACTO 2010 V1.3 - Edicion oficial' --notes-file documentacion/NOTAS_RELEASE_V1.3.md --latest
+          fi
+          files=$(gh release view v1.3 --json assets --jq '.assets[].name')
+          for n in Contacto_2010_V1.3-x86_64.AppImage CONTACTO_2010_V1.3_WINDOWS_x64.zip CONTACTO_2010_CARATULA_OFICIAL_4K.png CONTACTO_2010_V1.3_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf SHA256_CONTACTO_2010_V1.3.txt; do
+            grep -Fx "$n" <<< "$files"
+          done
+          echo 'PUBLICACION V1.3 VERIFICADA'
