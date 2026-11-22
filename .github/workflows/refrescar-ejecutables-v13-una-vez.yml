@@ -91,7 +91,6 @@ jobs:
           ./CONTACTO_2010.exe --self-test-piloto-visor
           ./CONTACTO_2010.exe --self-test-final
           test -s assets/PILOTO_FIREBIRD_01_RETRATO_RGBA.png
-          cmp assets/CONTACTO_2010_LOGO_JUEGO.png ../../../assets/CONTACTO_2010_LOGO_JUEGO.png
           test "$(sha256sum assets/CONTACTO_2010_LOGO_JUEGO.png | awk '{print $1}')" = "$(sha256sum ../../../assets/CONTACTO_2010_LOGO_JUEGO.png | awk '{print $1}')"
       - name: Comprimir Windows x64
         run: |
