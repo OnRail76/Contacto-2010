@@ -744,9 +744,9 @@ public:
 
  std::string num(int n){std::ostringstream s;s<<std::setw(7)<<std::setfill('0')<<n;return s.str();}
  void portrait(int role,int frame,int x,int y,int w,int h){
-   // Retrato fijo del piloto (rol 2): visor opaco, nunca parpadea.
+   // Retrato fijo del piloto (rol 0): visor opaco, nunca parpadea.
    // Centrado, sin distorsion, en la casilla original de radio/briefing.
-   if(role==2){
+   if(role==0){
      const int side=std::min(w,h),cx=x+w/2,cy=y+h/2;
      image("pilot_visored",cx-side/2,cy-side/2,side,side);return;
    }
@@ -760,7 +760,7 @@ public:
  void draw_radio(){if(radio.life<=0)return;
   const int y=447;box(18,y,734,82,{5,19,38,232},{53,133,185});line(20,y+2,750,y+2,CYAN);
   int frame=(int(radio.elapsed*7)%9<6)?int(radio.elapsed*7)%4:(6+int(radio.elapsed*4)%2);
-  const int radioFrame=radio.role==2?0:radio.role==3?int(radio.elapsed*10.f)%12:frame;
+  const int radioFrame=radio.role==0?0:radio.role==3?int(radio.elapsed*10.f)%12:frame;
    portrait(radio.role,radioFrame,24,y+1,68,80);
   text(radio.who+":",114,y+9,21,CYAN);
   const std::string& m=radio.msg;auto p=m.find('|');
@@ -2366,7 +2366,7 @@ void message(int role,const std::string&who,const std::string&msg,float duration
     const bool pilot=textures.count("pilot_visored") && textures["pilot_visored"].t
         && textures["pilot_visored"].w==512 && textures["pilot_visored"].h==512;
     // Asegura el retrato del piloto en radio y briefing, no anima la imagen.
-    radio.role=2;radio.life=5.f;radio.elapsed=1.f;radio.who="PILOTO";radio.msg="PRUEBA DE RADIO";
+    radio.role=0;radio.life=5.f;radio.elapsed=1.f;radio.who="PILOTO";radio.msg="PRUEBA DE RADIO";
     mode=PLAY;render();radio.elapsed=2.f;render();
     std::cout<<"PILOTO VISOR FIJO: "<<(pilot?"OK":"ERROR")<<"\n";
     return pilot?0:52;
