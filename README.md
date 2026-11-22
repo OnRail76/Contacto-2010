@@ -6,9 +6,9 @@ Arcade horizontal de ciencia ficción para **Linux x86_64**, creado por **Tony C
 
 **AURA-01**, computadora de a bordo de la Firebird-01, es la voz de los sistemas de la nave. Mantiene íntegramente los diálogos, avisos y apariciones establecidos, ahora con un ojo rojo animado de 12 fotogramas. [Ficha de AURA-01](documentacion/AURA-01_COMPUTADORA_FIREBIRD.md).
 
-**NOVEDADES V1.2:** banda sonora FutureDark en OGG Vorbis estéreo real a 44,1 kHz; efectos espaciales, reproductor de cassette animado, medidores L/R y scanlines configurables. Nueva carátula y nueva ilustración final con Firebird-01.
+**NOVEDADES V1.2.1:** banda sonora FutureDark en OGG Vorbis estéreo real a 44,1 kHz; efectos espaciales, reproductor de cassette animado, medidores L/R y scanlines configurables. Nueva carátula y nueva ilustración final con Firebird-01.
 
-[Detalles de V1.2: audio, cassette, scanlines y arte oficial](documentacion/NOVEDADES_V1.2.md).
+[Historial único de versiones y evolución del motor](HISTORIAL_VERSIONES.md).
 
 ![Captura real de CONTACTO 2010](capturas/CAPTURA_FASE_1.png)
 
@@ -29,11 +29,12 @@ Para compilar desde las fuentes: `bash COMPILAR_LINUX.sh` en Linux, o MSYS2 UCRT
 
 ## Ilustraciones oficiales
 
-La portada Firebird-01 se muestra al principio de este README. La escena final oficial está integrada en `assets/final_escena_firebird01_hd.png` y se presenta dentro del juego. Los PNG originales 4K se encuentran en la [Release V1.2](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2).
+La portada Firebird-01 se muestra al principio de este README. La escena final oficial está integrada en `assets/final_escena_firebird01_hd.png` y se presenta dentro del juego. Los PNG originales 4K se conservan en la [Release vigente V1.2.1](https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1).
 
 ## Documentación
 
-[Atlas oficial V1.2.1 sin spoilers (44 páginas)](documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
+- [Atlas oficial V1.2.1 sin spoilers (44 páginas)](documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf)
+- [Historial consolidado V1.1–V1.2.1](HISTORIAL_VERSIONES.md)
 
 ## Código y recursos
 
