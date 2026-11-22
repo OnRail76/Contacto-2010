@@ -1,4 +1,4 @@
-name: CONTACTO 2010 V1.2.1 - Compilacion y verificacion Linux/Windows
+name: CONTACTO 2010 V1.3 - Compilacion y verificacion Linux/Windows
 on:
   pull_request:
     paths:
@@ -47,7 +47,7 @@ jobs:
           test -s CAPTURA_OPCIONES_AUDIO.png
       - uses: actions/upload-artifact@v4
         with:
-          name: Contacto-2010-V1.2.1-QA-Capturas-Reales
+          name: Contacto-2010-V1.3-QA-Capturas-Reales
           path: |
             CAPTURA_REPRODUCTOR_MUSICAL.png
             CAPTURA_OPCIONES_AUDIO.png
@@ -59,19 +59,19 @@ jobs:
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x /tmp/appimagetool-x86_64.AppImage
           APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage bash packaging/appimage/CREAR_APPIMAGE.sh
-          mv dist/appimage/Contacto_2010_V1.2.1-x86_64.AppImage dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage
+          mv dist/appimage/Contacto_2010_V1.3-x86_64.AppImage dist/appimage/Contacto_2010_V1.3_CHECK-x86_64.AppImage
       - name: Prueba de AppImage real
         env:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
           APPIMAGE_EXTRACT_AND_RUN: '1'
         run: |
-          dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage --self-test-estereo-crt
-          dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage --self-test
+          dist/appimage/Contacto_2010_V1.3_CHECK-x86_64.AppImage --self-test-estereo-crt
+          dist/appimage/Contacto_2010_V1.3_CHECK-x86_64.AppImage --self-test
       - uses: actions/upload-artifact@v4
         with:
-          name: Contacto-2010-V1.2.1-CHECK-Linux-x86_64
-          path: dist/appimage/Contacto_2010_V1.2.1_CHECK-x86_64.AppImage
+          name: Contacto-2010-V1.3-CHECK-Linux-x86_64
+          path: dist/appimage/Contacto_2010_V1.3_CHECK-x86_64.AppImage
           compression-level: 0
           if-no-files-found: error
   windows:
@@ -102,7 +102,7 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: |
-          cd dist/windows/CONTACTO_2010_V1.2.1_WINDOWS_x64
+          cd dist/windows/CONTACTO_2010_V1.3_WINDOWS_x64
           ./CONTACTO_2010.exe --self-test-estereo-crt
           ./CONTACTO_2010.exe --self-test-menu
           ./CONTACTO_2010.exe --self-test
@@ -113,11 +113,11 @@ jobs:
       - name: ZIP de verificación
         run: |
           cd dist/windows
-          mv CONTACTO_2010_V1.2.1_WINDOWS_x64 CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64
-          zip -qr CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64.zip CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64
+          mv CONTACTO_2010_V1.3_WINDOWS_x64 CONTACTO_2010_V1.3_CHECK_WINDOWS_x64
+          zip -qr CONTACTO_2010_V1.3_CHECK_WINDOWS_x64.zip CONTACTO_2010_V1.3_CHECK_WINDOWS_x64
       - uses: actions/upload-artifact@v4
         with:
-          name: Contacto-2010-V1.2.1-CHECK-Windows-x64
-          path: dist/windows/CONTACTO_2010_V1.2.1_CHECK_WINDOWS_x64.zip
+          name: Contacto-2010-V1.3-CHECK-Windows-x64
+          path: dist/windows/CONTACTO_2010_V1.3_CHECK_WINDOWS_x64.zip
           compression-level: 0
           if-no-files-found: error
