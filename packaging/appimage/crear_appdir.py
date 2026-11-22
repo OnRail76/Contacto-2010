@@ -11,7 +11,7 @@ shutil.copy2(src/'CONTACTO_2010_LINUX',game/'CONTACTO_2010_LINUX')
 os.chmod(game/'CONTACTO_2010_LINUX',0o755)
 shutil.copytree(src/'assets',game/'assets',dirs_exist_ok=True,ignore=shutil.ignore_patterns('musica_*.wav'))
 shutil.copytree(src/'banda_sonora_original',game/'banda_sonora_original',dirs_exist_ok=True)
-shutil.copytree(src/'lib',game/'lib',dirs_exist_ok=True)
+(game/'lib').mkdir(parents=True,exist_ok=True)
 # Empaquetar la SDL2 del sistema del runner Ubuntu 22.04, NO la biblioteca
 # procedente de otra distribucion (dependia de GLIBC_2.38).
 def find_system_library(soname):
