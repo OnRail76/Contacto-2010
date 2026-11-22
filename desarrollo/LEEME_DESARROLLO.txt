@@ -1,9 +1,12 @@
-DESARROLLO Y ORIGINALES
-=======================
-- Los materiales originales de Tony C. Ware se conservan en material_original/.
-- El audio original de FutureDark está separado en ../banda_sonora_original/.
-- Fuentes y atlas en ../contacto_native.cpp y ../assets/.
-- Los antiguos scripts de reparación de fase 5 que introdujeron artefactos
-  NO forman parte de esta distribución limpia.
-- Las intermisiones, los textos de briefing y las transmisiones de radio
-  se mantienen sin cambios en la v0.15.1, para una revisión posterior.
+CONTACTO 2010 — DESARROLLO V1.2.1
+================================
+Versión oficial: https://github.com/OnRail76/Contacto-2010/releases/tag/v1.2.1
+
+- Código del juego: ../fuentes/contacto_native.cpp
+- Núcleo GRIT NOVA ENGINE: ../motor/grit_nova_engine.cpp y .hpp
+- Recursos activos: ../assets/ (sprites, PNG de terreno, WAV de efectos)
+- Banda sonora activa: ../banda_sonora_original/ (10 OGG estéreo)
+- Documentación actual: ../documentacion/CONTACTO_2010_V1.2.1_ATLAS_MEMORIA_MANUAL_GRIT_NOVA.pdf
+- GRIT NOVA, radio AURA-01, cassette animado y scanlines corresponden a V1.2.1.
+- Los recursos originales completos y builds históricos permanecen disponibles en Releases anteriores y en las etiquetas de Git; no forman parte del árbol activo.
+- Verificación: bash ../COMPILAR_LINUX.sh y SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ../CONTACTO_2010_LINUX --self-test-aura

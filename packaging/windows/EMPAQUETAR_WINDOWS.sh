@@ -2,11 +2,10 @@
 set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
-OUT="$ROOT/dist/windows/CONTACTO_2010_V1.2_WINDOWS_x64"
+OUT="$ROOT/dist/windows/CONTACTO_2010_V1.2.1_WINDOWS_x64"
 mkdir -p "$OUT"
 cp -f CONTACTO_2010.exe "$OUT/"
 cp -a assets banda_sonora_original "$OUT/"
-rm -f "$OUT/assets/audio/"musica_*.wav
 cp LICENSE LICENCIA_RECURSOS.md "$OUT/"
 cp packaging/windows/Contacto2010.ico "$OUT/"
 for dll in SDL2.dll libpng16-16.dll zlib1.dll libwinpthread-1.dll libvorbisfile-3.dll libvorbis-0.dll libogg-0.dll; do
@@ -31,7 +30,7 @@ cd /d "%~dp0"
 start "" "CONTACTO_2010.exe"
 BAT
 cat >"$OUT/LEEME_WINDOWS.txt" <<'TXT'
-CONTACTO 2010 V1.2 - Windows x64
+CONTACTO 2010 V1.2.1 - Windows x64
 Descomprime el ZIP entero y abre CONTACTO_2010.exe.
 No se necesita Python, Linux ni instalador.
 WASD o cursores: movimiento. ESPACIO: disparo.
