@@ -148,7 +148,7 @@ public:
      SDL_SetTextureBlendMode(scanlineTexture,1);
    }
   struct Item{const char* k;const char* f;};
-  const Item list[]={{"fondo","jupiter.png"},{"mapa","fase1_cementerio_v2_1920x540.png"},{"ship","firebird_01_16f_hd.png"},{"moai","moai_24f.png"},{"sierra","rodante_sierra_24f.png"},{"menor","enemigo_monolito_24f.png"},{"portrait","retratos_definitivos.png"},{"aura","AURA_01_SHEET_RGBA.png"},{"fx_orb","fx_bala_enemiga.png"},{"fx_pulse","fx_pulso.png"},{"fx_laser","fx_laser.png"},{"escudo_nuevo","escudo_firebird_nuevo_4f.png"},{"triangulo","alerta_estalactitas_4f.png"},{"mira","mira_debil_jefes_4f.png"},{"logo","CONTACTO_2010_LOGO_JUEGO.png"},{"marca_tony","tony_c_ware_logo.png"},{"marca_grit","grit_nova_logo_oficial.png"},{"hud","hud_militar_960x120.png"},{"glyph","fuente_legible.png"},
+  const Item list[]={{"fondo","jupiter.png"},{"mapa","fase1_cementerio_v2_1920x540.png"},{"ship","firebird_01_16f_hd.png"},{"moai","moai_24f.png"},{"sierra","rodante_sierra_24f.png"},{"menor","enemigo_monolito_24f.png"},{"portrait","retratos_definitivos.png"},{"pilot_visored","PILOTO_FIREBIRD_01_RETRATO_RGBA.png"},{"aura","AURA_01_SHEET_RGBA.png"},{"fx_orb","fx_bala_enemiga.png"},{"fx_pulse","fx_pulso.png"},{"fx_laser","fx_laser.png"},{"escudo_nuevo","escudo_firebird_nuevo_4f.png"},{"triangulo","alerta_estalactitas_4f.png"},{"mira","mira_debil_jefes_4f.png"},{"logo","CONTACTO_2010_LOGO_JUEGO.png"},{"marca_tony","tony_c_ware_logo.png"},{"marca_grit","grit_nova_logo_oficial.png"},{"hud","hud_militar_960x120.png"},{"glyph","fuente_legible.png"},
    {"hud_white","hud_fuentes/FUENTE_BLANCO_HIELO.png"},{"hud_cyan","hud_fuentes/FUENTE_CIAN_RADAR.png"},{"hud_amber","hud_fuentes/FUENTE_AMBAR_ARMA.png"},{"hud_magenta","hud_fuentes/FUENTE_MAGENTA_ALERTA.png"},{"hud_big","hud_fuentes/FUENTE_NUMEROS_GRANDES.png"},{"hud_smile","hud_fuentes/VIDAS_SMILEYS_RGBA.png"},
    {"fondo2","fase2_fondo_hd.png"},{"mapa2","fase2_terreno.png"},
    // Sierras rodantes compartidas por las fases 1 y 2; sin walkers. 
@@ -165,7 +165,10 @@ public:
    {"cel_devora_di","fase4_celula_devoradora_di.png"},{"cel_devora_id","fase4_celula_devoradora_id.png"},
    {"hijo","fase4_hijo_estrellas.png"}};
   for(const auto&i:list)if(!load(i.k,i.f))return false;
-  if(textures["aura"].w!=2172||textures["aura"].h!=724){
+  if(textures["pilot_visored"].w!=512||textures["pilot_visored"].h!=512){
+    std::cerr<<"Piloto Firebird-01: retrato estatico requerido 512x512 PNG RGBA\n";return false;
+   }
+   if(textures["aura"].w!=2172||textures["aura"].h!=724){
     std::cerr<<"AURA-01: atlas incorrecto; se necesita 2172x724 con 12 fotogramas\n";return false;
   }
   std::ifstream g(base+"terreno.bin",std::ios::binary);uint32_t n=0;g.read((char*)&n,4);
@@ -741,21 +744,23 @@ public:
 
  std::string num(int n){std::ostringstream s;s<<std::setw(7)<<std::setfill('0')<<n;return s.str();}
  void portrait(int role,int frame,int x,int y,int w,int h){
-   // AURA-01, computadora de Firebird-01: animacion RGBA 6x2, 12 frames.
+   // Retrato fijo del piloto (rol 0): visor opaco, nunca parpadea.
+   // Centrado, sin distorsion, en la casilla original de radio/briefing.
+   if(role==0){
+     const int side=std::min(w,h),cx=x+w/2,cy=y+h/2;
+     image("pilot_visored",cx-side/2,cy-side/2,side,side);return;
+   }
+   // AURA-01 (rol 3): su animacion original de 12 fotogramas sigue intacta.
    if(role==3){
-      // Centrado geométrico exacto: tanto el ojo como el marco del atlas son cuadrados.
-      // El mismo centro de la casilla se respeta en radio, briefing y pre-jefe.
-      const int side=std::min(w,h);
-      const int cx=x+w/2,cy=y+h/2;
-      sprite("aura",6,362,362,frame%12,cx-side/2,cy-side/2,side,side);
-      return;
-    }
+     const int side=std::min(w,h),cx=x+w/2,cy=y+h/2;
+     sprite("aura",6,362,362,frame%12,cx-side/2,cy-side/2,side,side);return;
+   }
    sprite("portrait",8,112,140,role*8+frame,x,y,w,h);
-  }
+ }
  void draw_radio(){if(radio.life<=0)return;
   const int y=447;box(18,y,734,82,{5,19,38,232},{53,133,185});line(20,y+2,750,y+2,CYAN);
   int frame=(int(radio.elapsed*7)%9<6)?int(radio.elapsed*7)%4:(6+int(radio.elapsed*4)%2);
-  const int radioFrame=(radio.role==3)?int(radio.elapsed*10.f)%12:frame;
+  const int radioFrame=radio.role==0?0:radio.role==3?int(radio.elapsed*10.f)%12:frame;
    portrait(radio.role,radioFrame,24,y+1,68,80);
   text(radio.who+":",114,y+9,21,CYAN);
   const std::string& m=radio.msg;auto p=m.find('|');
@@ -2356,6 +2361,15 @@ void message(int role,const std::string&who,const std::string&msg,float duration
         <<" on="<<on<<" protege="<<protects<<" record_intacto="<<recordProtected
         <<" entre_fases="<<persists<<" off="<<off<<" dano_normal="<<normalDamage<<" nuevo_juego="<<resets<<"\n";
     return ok?0:15;
+  }
+  if(argc>=2 && std::string(argv[1])=="--self-test-piloto-visor"){
+    const bool pilot=textures.count("pilot_visored") && textures["pilot_visored"].t
+        && textures["pilot_visored"].w==512 && textures["pilot_visored"].h==512;
+    // Asegura el retrato del piloto en radio y briefing, no anima la imagen.
+    radio.role=0;radio.life=5.f;radio.elapsed=1.f;radio.who="PILOTO";radio.msg="PRUEBA DE RADIO";
+    mode=PLAY;render();radio.elapsed=2.f;render();
+    std::cout<<"PILOTO VISOR FIJO: "<<(pilot?"OK":"ERROR")<<"\n";
+    return pilot?0:52;
   }
   if(argc>=2 && std::string(argv[1])=="--self-test-aura"){
     bool atlas=textures.count("aura") && textures["aura"].t
