@@ -39,6 +39,14 @@ Juego y motor actuales: cinco fases, Firebird-01, GRIT NOVA ENGINE, banda sonora
 - **Atlas vigente:** 44 páginas con capturas reales, Bazzite/Linux y Windows, **sin imágenes del último jefe ni del final**.
 - **Ilustración final:** recurso oficial integrado en el juego; no se publica en las páginas del atlas para evitar destripes.
 
+## Detalles de la modernización audiovisual V1.2
+
+La banda sonora de FutureDark utiliza diez archivos OGG Vorbis con dos canales reales. El motor mezcla sonido PCM de salida a **44.100 Hz, 16 bits, estéreo**, decodifica únicamente la pista activa y adapta la frecuencia cuando corresponde antes de reproducirla; no decodifica OGG en el callback de audio. Los efectos mantienen sus archivos WAV originales: pasan desde 22.050 Hz mono al mezclador estéreo y se posicionan espacialmente, con volúmenes independientes.
+
+El reproductor de cassette integra bobinas animadas, simulación de recogida de cinta, barra de progreso, contador `MM:SS` y medidores L/R tomados de las muestras reproducidas. Los carretes se detienen con la pausa. Controles documentados del reproductor: arriba/abajo para seleccionar, izquierda/derecha para cambiar de pista, INTRO para reproducir, **P** para pausar/reanudar, **X** para detener y **ESC** para volver.
+
+La opción de CRT añade cuatro niveles de scanlines (desactivadas, suaves, arcade, intensas) sin sustituir la imagen original del juego. El estado del audio espacial, los volúmenes y las scanlines se conserva en `audio_config.ini`. El formato comprimido evita distribuir antiguos WAV musicales sin perder la mezcla estéreo original.
+
 ## Decisiones de mantenimiento y conservación
 
 1. **Una única Release descargable:** V1.2.1. Las publicaciones V1.1 y V1.2 se retiraron de la sección Releases para evitar instalar versiones anteriores por error.
