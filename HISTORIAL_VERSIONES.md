@@ -20,7 +20,6 @@ El motor GRIT NOVA ENGINE conserva la campaña de cinco fases, diez pistas origi
 | 21-11-2026, 21:36 UTC | **V1.2** | Música FutureDark OGG Vorbis **estéreo real** a 44,1 kHz, SFX espaciales, cassette animado con medidores L/R y scanlines. Nueva portada Firebird-01 y nueva ilustración del final. | Sustituida |
 | 21-11-2026, 22:09 UTC | **V1.2.1** | **AURA-01** sustituye al personaje de comunicaciones anterior, conservando diálogos y tiempos. Nuevo ojo rojo RGBA de 12 fotogramas centrado en radio, briefings e introducciones. Actualización de atlas y documentación y recompilación Linux/Windows. | Sustituida |
 | 22-11-2026 | **Mantenimiento de V1.2.1** | Limpieza de WAV musicales mono duplicados, atlas viejo, binarios de SDL2 no compatibles, documentos y scripts anticuados; actualización de empaquetadores y workflows actuales. No modifica las reglas ni la banda sonora. | Integrado en `main` |
-
 | 22-11-2026, 17:57 UTC | **V1.3** | Nueva portada oficial de dos alas y logotipo, iconos Linux/Windows, atlas de **45 páginas**, retrato fijo del piloto y escena final actualizada conservados. Compilaciones nativas verificadas. | **Vigente** |
 
 ## Evolución técnica
