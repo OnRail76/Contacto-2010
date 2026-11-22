@@ -9,7 +9,7 @@ if [[ -z "$APPIMAGETOOL" ]]; then
   exit 2
 fi
 cd "$ROOT/dist/appimage"
-export ARCH=x86_64 VERSION=1.2 APPIMAGE_EXTRACT_AND_RUN=1
-"$APPIMAGETOOL" Contacto2010.AppDir "Contacto_2010_V1.2-x86_64.AppImage"
-chmod +x "Contacto_2010_V1.2-x86_64.AppImage"
-echo "Generado: $ROOT/dist/appimage/Contacto_2010_V1.2-x86_64.AppImage"
+export ARCH=x86_64 VERSION=1.2.1 APPIMAGE_EXTRACT_AND_RUN=1
+"$APPIMAGETOOL" Contacto2010.AppDir "Contacto_2010_V1.2.1-x86_64.AppImage"
+chmod +x "Contacto_2010_V1.2.1-x86_64.AppImage"
+echo "Generado: $ROOT/dist/appimage/Contacto_2010_V1.2.1-x86_64.AppImage"
